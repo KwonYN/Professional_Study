@@ -1,0 +1,175 @@
+﻿// (중상) [교육P-0007] 군사 도로망 
+/*
+    【 문제 이해 】
+    N개의 도시, 도시들을 연결하는 도로(양방향, 두 노드 사이엔 최대 하나!)
+    많은 도로가 파괴된 상태..
+    -> 모든 쌍의 도시가 연결되어야! (파괴/건설하여)
+    -> 단 하나의 길로만! 즉, 1에서 3으로 가는데 한 가지의 길만 있어야 함!
+        즉, "사이클이 생기지 않도록!"
+
+    【 문제 풀이 】
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <tuple>
+#include <algorithm>
+using namespace std;
+#define NMAX    (100000)
+#define MMAX    (250000)
+#define KMAX    (250000)
+
+typedef tuple<int, int, int> tiii;  // cost, v1, v2
+int T, N, M, K;
+int city[NMAX+5];
+long long cost; // 100만 비용의 도로를 최대 249,999개 만들어야 할 수도!
+tiii destroy[MMAX+5], construct[MMAX+5];
+
+void init() {
+    tiii zero = make_tuple(0, 0, 0);
+    cost = 0LL;
+    for (int i = 1; i <= N; i++) city[i] = i;
+    for (int i = 0; i < M; i++) destroy[i] = zero;
+    for (int i = 0; i < K; i++) construct[i] = zero;
+}
+
+int find(int v) {
+    if (v == city[v]) return v;
+    return city[v] = find(city[v]);
+}
+
+void _union(int v1, int v2) {
+    v1 = find(v1);
+    v2 = find(v2);
+    city[v1] = v2;
+}
+
+bool chk_union(int v1, int v2) { return find(v1) == find(v2); }
+
+bool compare_increasing(const tiii &t1, const tiii &t2) {   // 오름차순
+    return get<0>(t1) < get<0>(t2);
+}
+
+bool compare_decreasing(const tiii& t1, const tiii& t2) {   // 내림차순
+    return get<0>(t1) > get<0>(t2);
+}
+
+void input_init_operation() {
+    int v1, v2, c, cnt = 0;
+    // 입력
+    scanf("%d %d %d", &N, &M, &K);
+    init(); // 초기화
+    // 입력1
+    for (int i = 0; i < M; i++) {  // 제거 : 가장 싼 것부터 제거
+        scanf("%d %d %d", &v1, &v2, &c);
+        destroy[i] = make_tuple(c, v1, v2);
+    }
+    // 제거 : 사이클이 이루어지지 않으면 만들고,
+    //        사이클이면 만들지 않으면서(제거) 비용을 더해줌
+    sort(destroy, destroy + M, compare_decreasing);
+    for (int i = 0; i < M; i++) {
+        c = get<0>(destroy[i]);     // cost
+        v1 = get<1>(destroy[i]);    // city1
+        v2 = get<2>(destroy[i]);    // city2
+        if (!chk_union(v1, v2)) { _union(v1, v2); cnt++;  }
+        else {
+            cost += (1LL * c);
+        }
+    }
+    // 입력2
+    for (int i = 0; i < K; i++) {  // 건설 가능 : 가장 싼 것부터 건설
+        scanf("%d %d %d", &v1, &v2, &c);
+        construct[i] = make_tuple(c, v1, v2);
+    }
+    // 건설 : 사이클이 이루어지지 않는다면 건설, 아님 반대
+    sort(construct, construct + K, compare_increasing);
+    for (int i = 0; i < K; i++) {
+        c = get<0>(construct[i]);     // cost
+        v1 = get<1>(construct[i]);    // city1
+        v2 = get<2>(construct[i]);    // city2
+        if (cnt == N - 1) break;
+        if (!chk_union(v1, v2)) {
+            _union(v1, v2);
+            cnt++;
+            cost += (1LL * c);
+        }
+    }
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, cost); }
+
+int main() {
+    //freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input_init_operation();
+        output(tc);
+    }
+    return 0;
+}
+#endif
+
+// 이전 코드
+#if 0
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NKMAX   (250000)
+ 
+typedef struct { int s, e, w; }EXIST;
+EXIST existed[NKMAX + 2];
+EXIST constructable[NKMAX + 2];
+ 
+int T, N, M, K, chk[NKMAX + 2];
+long long min_cost;
+ 
+bool cmp(const EXIST &p1, const EXIST &p2) {
+    if (p1.w < p2.w)  return true;
+    if (p1.w == p2.w) return p1.s < p2.s;
+    return false;
+}
+ 
+int find(int v) {
+    if (chk[v] == v) return v;
+    return chk[v] = find(chk[v]);
+}
+ 
+void ally(int a, int b) { chk[find(a)] = find(b); }
+ 
+int main() {
+    int a, b, c;
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        min_cost = 0ll;
+        scanf("%d %d %d", &N, &M, &K);
+        for (int i = 1; i <= N; i++) chk[i] = i;
+        for (int i = 0; i < M; i++) {
+            scanf("%d %d %d", &a, &b, &c);
+            existed[i].s = a;   existed[i].e = b;   existed[i].w = c;
+        }
+        stable_sort(existed, existed + M, cmp);
+        for (int i = M - 1; i >= 0; i--) {
+            EXIST tmp = existed[i];
+            if (find(tmp.s) != find(tmp.e)) ally(tmp.s, tmp.e);
+            else min_cost += tmp.w;
+        }
+ 
+        for (int i = 0; i < K; i++) {
+            scanf("%d %d %d", &a, &b, &c);
+            constructable[i].s = a; constructable[i].e = b; constructable[i].w = c;
+        }
+        stable_sort(constructable, constructable + K, cmp);
+        for (int i = 0; i < K; i++) {
+            EXIST tmp = constructable[i];
+            if (find(tmp.s) != find(tmp.e)) {
+                min_cost += tmp.w;
+                ally(tmp.s, tmp.e);
+            }
+        }
+        printf("#%d %lld\n", tc, min_cost);
+    }
+    return 0;
+}
+
+#endif

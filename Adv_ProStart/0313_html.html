@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko" style="overflow:hidden;">
+<head>
+<title>Knox Portal</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="/static/common/css/default.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/button.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/popup.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/lib/styles/jquery-ui.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/jqueryOverride.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/reset.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/winpop.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/drm.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/common/css/error.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/employee/empsearch/css/employee.css?v=20200305001" type="text/css"/>
+<link rel="stylesheet" href="/static/pims/calendar/css/calendar.css?v=20200305001" type="text/css"/>
+
+<!-- 각모듈 css -->
+<link rel="stylesheet" href="/static/mail/css/mail.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/attach/css/attachment.css?v=20200213001" type="text/css"/>
+<link rel="stylesheet" href="/static/employee/empsearch/css/sentFavorite.css?v=20200305001" type="text/css"/>
+
+<script type="text/javascript" for="pcProtectorInstall" event="FireCtrlInitComplete();"> 
+	var protectorInstall = document.getElementById("pcProtectorInstall"); 
+	if(protectorInstall){ 
+		var flag = protectorInstall.CheckProtect(); 
+		var regex = new RegExp("[\\?&]installed=([^&#]*)"); 
+       var results = regex.exec(location.search); 
+	    var result = results === null ? "" : decodeURIComponent(results[1].replace(/\\+/g, " "));
+		if (flag == "1" && !result) { 
+	 		location.href=location.href+"?installed=true"; 
+		} 
+	}else{ 
+/*		onMailErrorInstall(); */ 
+	} 
+</script>
+		
+</head>
+
+<body style="display:none;" class="st02">
+	<div class="win-wrap">
+		<!-- S : title -->
+		<div class="win-header dis">
+			<h1><label data-mail-message-id="label.ML026" data-mail-message-option="delTag"><!-- 본문 보기 --></label></h1>
+			<span class="top-security" style="display:none"><label data-mail-message-id="label.ML166" data-mail-message-option="delTag"><!-- 대외비 --></label></span>
+		</div>
+	
+		<!-- E : title -->
+		<!-- S : content -->
+		<div class="win-body-container">
+			<div class="js-tab-view js-detail-view">
+				<div class="view-area">
+					<div class="view-content">
+						<div class="cont">
+							<!-- S : view -->
+							<div class="view-header-box"><!-- 2015-10-19 마크업 추가 -->
+								<div class="view-header clfix">
+									<div class="cont-default">
+										<p>&nbsp;</p>
+										<span>&nbsp;</span>
+									</div>
+								</div>
+							</div>
+							<div class="view-content-box">
+								<div class="read-frame"></div>
+								<!-- 간편답장 -->
+								<div class="quick-send" style="display: none"><!-- 여기 클릭시 class="open" 추가 -->
+									<span class="click"><label data-mail-message-id="msg.ML056" data-mail-message-option="delTag"><!-- 간단하게 답장을 보내려면 <i>여기</i>를 클릭해 주세요. --></label></span>
+									<div class="send-area">
+										<dl>
+											<dt><input type="text" name="simpleReplyTitle" class="input02" data-mail-title-message-id="msg.ML082" data-mail-placeholder-message-id="msg.ML082"><label for="" class="blind" data-mail-message-id="label.ML400"></label></dt>
+											<dd>
+												<textarea class="scr01" rows="5" name="simpleReplyCont" data-mail-title-message-id="msg.ML019" data-mail-placeholder-message-id="msg.ML019"></textarea>
+											</dd>
+										</dl>
+										<div class="btn-tbl-area">
+											<button type="button" class="button05 type02 noline" data-mail-title-message-id="label.ML041"><span data-mail-message-id="label.ML041"><!--취소--></span>
+											<button type="button" class="button05 type02 noline" data-mail-title-message-id="label.ML043"><span data-mail-message-id="label.ML043"><!--답장--></span>
+											<button type="button" class="button05 type02 noline" data-mail-title-message-id="label.ML044"><span data-mail-message-id="label.ML044"><!--전체답장--></span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- E : view -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- E : content -->
+	</div>
+	
+	<!--  공통 라이브러리-->
+	<script type="text/javascript" src="/static/common/lib/scripts/jquery.min.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/lib/scripts/jquery-ui.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/lib/scripts/jquery.cookie.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/lib/scripts/jquery.i18n.properties.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/lib/scripts/html2canvas.js?v=20200213001"></script>	
+	
+	<!--  공통 -->
+	<script type="text/javascript" src="/static/common/js/common.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/selectMenu/SelectMenu.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/selectMenu/DepthMenu.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/selectMenu/subSelect.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/popup/Popup.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/grid/MyGrid.v2.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/util/parseTag.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/ui/treeSet.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/commonMessages.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/util/errorFunction.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/util/errorPage.js?v=20200213001"></script>
+	<script type="text/javascript" src="/static/common/js/util/popup.js?v=20200213001"></script>
+	
+	<!-- 범주 -->
+	<script type="text/javascript" src="/static/employee/common/js/category/cg_categoryMessage.js?v=20200305001"></script>
+	<script type="text/javascript" src="/static/employee/category/js/ctgApply/cg_multi.js?v=20200305001"></script>
+	
+	<!-- 임직원 -->
+	<script type="text/javascript" src="/static/employee/common/lib/jquery.json-2.4.min.js?v=20200305001"></script>
+	<script type="text/javascript" src="/static/employee/empsearch/js/profile/em_profile.js?v=20200305001"></script>
+	<script type="text/javascript" src="/static/employee/empsearch/js/profile/em_hoverCard.js?v=20200305001""></script>
+	<script type="text/javascript" src="/static/employee/empsearch/js/empSearch/em_recipient.js?v=20200305001"></script>
+	<script type="text/javascript" src="/static/employee/empsearch/js/empSearch/em_quick.js?v=20200305001"></script>
+	
+	<!-- 메신저 -->
+	<script type="text/javascript" src="/static/im/js/messenger.js?v=@mtimestamp@"></script>
+	
+	<!-- 데스크탑 메세지. -->
+	<script type="text/javascript" src="/static/desktop/js/checkDesktopMessage.js?v=20200305001"></script>
+	
+	<!-- 일정 -->
+	<script type="text/javascript" src="/static/pims/lib/fullcalendar/lib/moment.min.js?v=@mtimestamp@"></script>
+	<script type="text/javascript" src="/static/pims/lib/fullcalendar/lib/moment-timezone-with-data.js?v=@mtimestamp@"></script>
+	<script type="text/javascript" src="/static/pims/calendar/js/calendarRegistration.js?v=@mtimestamp@"></script>
+	
+	
+	<!-- 메일 -->
+	<script data-main="/static/mail/js/main.js?v=20200305001" src="/static/mail/js/lib/requirejs/require.js"></script>
+
+</body>
+
+</html>

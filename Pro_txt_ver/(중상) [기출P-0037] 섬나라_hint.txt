@@ -1,0 +1,97 @@
+// (중상) [기출P-0037] 섬나라
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMMAX	(500)
+#define QMAX	(100000)
+
+typedef struct { int y, x; }NODE;
+int T, N, M, Q;
+int island[NMMAX+5][NMMAX+5];
+vector<NODE> q[QMAX+5];
+bool chk[QMAX+5];
+int input_num[QMAX+5];
+int cnt_island[QMAX+5];
+
+
+void init() {
+	for(int i = 1; i <= QMAX; i++) {
+		q[i].clear();
+		chk[i] = false;
+		input_num[i] = 0;
+		cnt_island[i] = 0;
+	}
+}
+
+int main() {
+	int tmp;
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		// 초기화
+		init();
+		// 입력
+		scanf("%d %d", &N, &M);
+		for(int i = 1; i <= N; i++) {
+			for(int j = 1; j <= M; j++) {
+				scanf("%d", &island[i][j]);
+				q[island[i][j]].push_back( { i, j } );
+			}
+		}
+		scanf("%d", &Q);
+		for(int i = 1; i <= Q; i++) {
+			scanf("%d", &tmp);
+			if(!chk[tmp]) {
+				chk[tmp] = true;
+				input_num[i] = tmp; // 중복제거
+				for(NODE cur : q[tmp]) {
+					island[cur.y][cur.x] = -1;
+				}
+			}
+			else input_num[i] = 0;
+		}
+		// 섬 넘버링 : 현재 다 파괴한 상태이므로, 남아있는 -1이 아닌 양수들의 군집을 섬으로 간주하고, Union 해주어야 함!
+		
+
+		// num_cnt ~ 1까지 섬을 복원해주면서, 복원된 땅의 사방에 있는 섬과 Union -> 거꾸로 섬의 개수 저장해줌(cnt_island[i])
+		// input_num[i] == 0이면 continue로 넘어가줌
+		
+
+		// 
+		
+
+		// 출력
+		printf("#%d", tc);
+		for(int i = 1; i <= Q; i++) {
+			if(cnt_island[i] == 0) printf(" %d", cnt_island[i] = cnt_island[i-1]);
+			else printf(" %d", cnt_island[i]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
+
+
+
+
+/*
+2                                              ← 2 test cases in total 
+3 4                                            ← 1st case 
+4 2 5 3 
+1 2 3 3 
+1 2 5 5 
+2 
+2 3 
+5 4                                            ← 2nd case 
+1 2 1 2 
+2 1 2 1 
+1 2 1 2 
+2 1 2 1 
+1 2 1 2 
+3 
+1 1 2
+
+#1 2 3 
+#2 10 10 0 
+*/

@@ -1,0 +1,627 @@
+/************************/
+/* [ 2020.02.12 day 3 ] */
+/************************/
+
+// ★(중) [연습A-0020] 탑   
+// Stack
+#if 01
+
+#include <cstdio>
+#define MAX_HEIGHT	500000
+
+int T, N;
+int tower[MAX_HEIGHT + 10];
+int st[MAX_HEIGHT + 10];
+long long ans;
+int top;
+
+void input()
+{
+	ans = 0;
+	scanf("%d", &N);
+	for (int i = 1; i <= N; i++) scanf("%d", &tower[i]);
+}
+
+void print_st()
+{
+	printf("print_st\n");
+	for (int i = 1; i <= top; i++) printf("%d ", st[i]);
+	printf("\n");
+	for (int i = 1; i <= top; i++) printf("%d ", tower[st[i]]);
+	printf("\n");
+}
+
+void operation()
+{
+	top = 0;
+	for (int i = 1; i <= N; i++)
+	{
+		st[++top] = i;
+		while (top > 1)
+		{
+			if (tower[st[top]] > tower[st[top - 1]]) st[top-1] = st[top--];
+			else
+			{
+				ans += st[top-1];
+				break;
+			}
+		}
+		//print_st();
+	}
+}
+
+int main()
+{
+	//freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %lld\n", tc, ans%1000000007);
+	}
+
+	return 0;
+}
+
+#endif
+
+
+
+
+// ★★★(중상) [연습P-0016] 울타리 색칠하기 : 미처 못 품;
+// Deque
+#if 01
+
+#include <cstdio>
+#define MAX	1000000
+
+int T, N, X;
+int height[MAX + 10];	// 판자의 높이
+int deq[MAX + 10];		// 판자의 idx
+int wp, rp;
+int total_range, min_range, min_cnt;
+//int painted[MAX + 10];
+
+void input()
+{
+	int num;
+
+	min_range = min_cnt = 1 << 30;
+	total_range = 0;
+	scanf("%d", &N);
+	scanf("%d", &X);
+	for (int i = 1; i <= N; i++)
+	{
+		scanf("%d", &num);
+		height[i] = num;
+		total_range += num;
+		//painted[i] = 0;
+	}
+}
+
+// Double-handed Queue => Deque
+void operation()
+{
+	wp = rp = 0;
+	for (int i = 1; i <= N; i++)
+	{
+		deq[++wp] = i;
+		while(wp > )
+	}
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %d %d\n", tc, min_range, min_cnt);
+	}
+
+	return 0;
+}
+
+#endif
+
+
+
+
+// ★★(중) [기출A-0030] 어떤 트리 : 24/25... 1가지는 어떤 경우일까?
+// Tree
+#if 01
+
+#include <cstdio>
+#define MAX(a, b)	( ( (a) > (b) ) ? (a) : (b) )
+
+int T, N, z;
+int arr[10010];
+int max_lv;
+int lv_list[15] = {0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 10000};
+int lv, loc;
+
+void input()
+{
+	scanf("%d", &N);
+	for (int i = 1; i <= N; i++) scanf("%d", &arr[i]);
+	for (int i = 1; i < 15; i++)
+	{
+		if (lv_list[i - 1] < N && lv_list[i] <= N)
+		{
+			max_lv = i;
+			break;
+		}
+	}
+}
+
+void print_arr()
+{
+	printf("print_arr\n");
+	for (int i = 1; i <= N; i++) printf("%d ", arr[i]);
+	printf("\n");
+}
+
+void operation()
+{
+	int l, r, tmp;
+	arr[N] = -(1 << 30);
+	arr[1] = arr[N--];
+	z = 1;
+	lv = 0;
+
+	int i = 1;
+	while(i < N)
+	{
+		//printf("i = %d\n", i);
+		//print_arr();
+		l = i * 2, r = i * 2 + 1;
+		if (l > N) break;
+		if (arr[i] > MAX(arr[l], arr[r])) break;
+		else if (arr[i] < arr[l] && arr[l] > arr[r])
+		{
+			tmp = arr[i];
+			arr[i] = arr[l];
+			arr[l] = tmp;
+			i = z = l;
+		}
+		else if(arr[i] < arr[r] && arr[r] > arr[l])
+		{
+			tmp = arr[i];
+			arr[i] = arr[r];
+			arr[r] = tmp;
+			i = z = r;
+		}
+		lv++;
+	}
+	loc = z - lv_list[lv];
+	//printf("z = %d, lv = %d\n", z, lv);
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %d %d\n", tc, lv, loc);
+	}
+	return 0;
+}
+
+#endif
+
+
+
+
+// ★(중상) [연습P-0019] 구간합 : long long 가능성에 항상 유의!! && tree 구조에서의 update, search 익히기!
+// Indexed Tree
+#if 01
+
+#include <cstdio>
+#define NMAX	100000
+#define QMAX	200000
+#define MOD		1000000007
+
+int T, N, Q;
+int quest[QMAX+10][3];
+long long int ans;
+long long int tree[NMAX*4];
+int maldan;
+
+void input()
+{
+	scanf("%d", &N);
+	for (maldan = 1; maldan < N; maldan *= 2);
+	for (int i = 1; i <= 2 * maldan; i++) tree[i] = 0;
+	for (int i = 1; i <= N; i++) tree[i + maldan - 1] = i;
+	for (int i = maldan - 1; i >= 1; i--) tree[i] = tree[i * 2] + tree[i * 2 + 1];
+	scanf("%d", &Q);
+	for (int i = 1; i <= Q; i++) scanf("%d %d %d", &quest[i][0], &quest[i][1], &quest[i][2]);
+}
+
+void update(int idx, int new_val)
+{
+	int ix = idx + maldan - 1;
+	tree[ix] = new_val;
+	while (ix > 1) // 1 : 루트 노드의 인덱스
+	{
+		ix /= 2;
+		tree[ix] = tree[ix * 2] + tree[ix * 2 + 1];
+	}
+}
+
+long long int search_sum(int s, int e)
+{
+	long long int ret = 0;
+	s = s + maldan - 1;
+	e = e + maldan - 1;
+	while (s <= e)
+	{
+		if (s & 1) ret += tree[s++];
+		if (!(e & 1)) ret += tree[e--];
+		if (ret > MOD) ret -= MOD;
+		s /= 2;	e /= 2;
+	}
+	return ret;
+}
+
+void printf_tree()
+{
+	printf("printf_tree\n");
+	for (int i = 1; i <= 2 * maldan - 1; i++) printf("%lld ", tree[i]);
+	printf("\n");
+}
+
+void operation()
+{
+	ans = 0;
+
+	for (int i = 1; i <= Q; i++)
+	{
+		if (!quest[i][0]) update(quest[i][1], quest[i][2]);
+		else ans += search_sum(quest[i][1], quest[i][2]);
+		//printf("ans = %lld\n", ans);
+		//printf_tree();
+	}
+	if (ans < 0) ans += MOD;
+	else ans %= MOD;
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %lld\n", tc, ans);
+	}
+	
+	return 0;
+}
+
+
+/*
+// Indexed Tree 구현 설명s - 이해 꼭 하자!!
+
+// 우선 tree[] 배열을 초기화해주는 작업이 필요하다!!!
+#define MAX	500
+int tree[MAX];
+int ts; // 말단 노드 개수(즉, 가장 밑에 있는 노드들의 총 개수(arr가 5개로 주어졌다면, full 8로 주어주면 되겠지?))
+void update(int i, int new_val)
+{
+	int ix = i + ts - 1;
+	tree[ix] = new_val;
+	while (ix > 1) // 1 : 루트 노드의 인덱스
+	{
+		ix /= 2;
+		tree[ix] = tree[ix * 2] + tree[ix * 2 + 1];
+	}
+}
+
+//
+int from[];
+int to[];
+int search(int s, int e, int ix)
+{
+	int a, b;
+	if (s <= from[ix] && to[ix] <= e) return tree[ix];
+	a = search(s, e, ix * 2);		// 왼쪽 자식에 대하여
+	b = search(s, e, ix * 2 + 1);	// 오른쪽 자식에 대하여
+	return a + b;
+}
+
+
+// 구간의 합 구하기
+int search(int s, int e)
+{
+	int ret = 0;
+	s = s + ts - 1;
+	e = e + ts - 1;
+	while (s <= e)
+	{
+		if (s % 2 == 1)
+		{
+			ret += tree[s];
+			s++;
+		}
+		if (e % 2 == 0)
+		{
+			ret += tree[e];
+			e--;
+		}
+		s /= 2;	e /= 2;		
+	}
+	return ret;
+}
+*/
+
+#endif
+
+
+
+
+// ★(중상) [교육P-0031] 최대와 최소 : update, search 적용
+#if 01
+
+#include <cstdio>
+#define MAX(a, b) ( ( (a) < (b) ) ? (b) : (a) )
+#define MIN(a, b) ( ( (a) < (b) ) ? (a) : (b) )
+#define QMAX	100000
+#define NMAX	100000
+
+int T, N, Q;
+int arr[NMAX*4];
+int brr[NMAX*4];
+int quest[QMAX + 10][3];
+int ansx, ansn;
+int maldan;
+
+void input()
+{
+	ansx = ansn = 0;
+	scanf("%d %d", &N, &Q);
+	for (maldan = 1; maldan < N; maldan *= 2);
+	for (int i = 1; i <= 2 * maldan; i++) arr[i] = brr[i] = 0;
+	for (int i = 1; i <= N; i++)
+	{ 
+		scanf("%d", &arr[i + maldan - 1]); 
+		brr[i + maldan - 1] = arr[i + maldan - 1];
+	}
+	for (int i = maldan - 1; i >= 1; i--)
+	{
+		arr[i] = MAX(arr[i * 2], arr[i * 2 + 1]);
+		brr[i] = MIN(brr[i * 2], brr[i * 2 + 1]);
+	}
+	for (int i = 1; i <= Q; i++) scanf("%d %d %d", &quest[i][0], &quest[i][1], &quest[i][2]);
+}
+
+void update(int i, int new_val)
+{
+	int ix = i + maldan - 1;
+	arr[ix] = brr[ix] = new_val;
+	while (ix > 1) // 1 : 루트 노드의 인덱스
+	{
+		ix /= 2;
+		arr[ix] = MAX(arr[ix * 2], arr[ix * 2 + 1]);
+		brr[ix] = MIN(brr[ix * 2], brr[ix * 2 + 1]);
+	}
+}
+
+int search_max(int s, int e)
+{
+	int ret = 0;
+	s = s + maldan - 1;
+	e = e + maldan - 1;
+	while (s <= e)
+	{
+		if (s & 1)
+		{
+			ret = MAX(arr[s], ret);
+			s++;
+		}
+		if (!(e & 1))
+		{
+			ret = MAX(arr[e], ret);
+			e--;
+		}
+		s /= 2;	e /= 2;
+	}
+	return ret;
+}
+
+int search_min(int s, int e)
+{
+	int ret = 1 << 30;
+	s = s + maldan - 1;
+	e = e + maldan - 1;
+	while (s <= e)
+	{
+		if (s & 1)
+		{
+			ret = MIN(brr[s], ret);
+			s++;
+		}
+		if (!(e & 1))
+		{
+			ret = MIN(brr[e], ret);
+			e--;
+		}
+		s /= 2;	e /= 2;
+	}
+	return ret;
+}
+
+void operation()
+{
+	for (int i = 1; i <= Q; i++)
+	{
+		if (quest[i][0] == 1) update(quest[i][1], quest[i][2]);
+		else
+		{
+			ansx += search_max(quest[i][1], quest[i][2]);
+			ansn += search_min(quest[i][1], quest[i][2]);
+		}
+	}
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %d %d\n", tc, ansx, ansn);
+	}
+	return 0;
+}
+
+#endif
+
+
+
+
+// ★★★(중상) [교육P-0010] 금속활자 인쇄기 : 다시 츄라이 츄라이...
+#if 01
+
+#include <iostream>
+#include <cstdio>
+#include <string>
+using namespace std;
+
+#define MAX	25000
+
+int T, N;
+string wrd[MAX+10];
+
+struct Node
+{
+	char alpha;
+	int cnt = 0;
+	char next_alpha[26];
+	Node *child[26];
+};
+Node churie[MAX * 20 + 10];
+
+void input()
+{
+	scanf("%d", &N);
+	for (int i = 1; i <= N; i++) cin >> wrd[i];
+}
+
+void make_trie()
+{
+	Node root = { '\0', 0, { 0, }, {0, } };
+
+}
+
+int main()
+{
+	/*string str = "Hidoyi";
+	printf("%d\n", str.length());
+	printf("%d\n", str[2]);*/
+
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+
+		printf("#%d \n", tc);
+	}
+
+	return 0;
+}
+
+#endif
+
+
+
+
+// ★★★[교육P-0022] 히스토그램에서 가장 큰 직사각형 : 울타리처럼 Deque를 이용하는 건가? 그런데 구간이 없어서..
+//	=> 다시 풀어 보기로 하자!!
+#if 01
+
+#include <cstdio>
+#define MAX	100000
+
+int T, N;
+int rec[MAX+10];
+long long int ans;
+
+void input()
+{
+	ans = 0;
+
+	scanf("%d", &N);
+	for (int i = 1; i <= N; i++) scanf("%d", &rec[i]);
+}
+
+void operation()
+{
+
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+		operation();
+		printf("#%d %lld\n", tc, ans);
+	}
+
+	return 0;
+}
+
+#endif
+/*
+	[문제 접근 방법!]
+	Stack적인 사고...
+	한 막대를 기준으로... 앞 뒤를 살펴보며 어느 구간까지 그 길이의 직사각형을 칠할 수 있는지?
+*/
+
+
+
+
+// ★★★(중상) [기출P-0041] K-Heap 슈퍼이벤트 
+// Indexed Tree를 응용한 문제!!
+#if 01
+
+#include <cstdio>
+#define QMAX	300000
+
+int T, Q;
+int quest[QMAX + 10][2];
+
+void input()
+{
+	scanf("%d", &Q);
+	for (int i = 1; i <= Q; i++)
+	{
+		scanf("%d %d", &quest[i][0], &quest[i][1]);
+	}
+}
+
+int main()
+{
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++)
+	{
+		input();
+
+
+		printf("#%d ", tc);
+	}
+
+	return 0;
+}
+
+#endif
+
+
+// ios::sync_with_stdio(false); : cin, cout 이 빨라 진다고 함.. 동기화 안 해서?

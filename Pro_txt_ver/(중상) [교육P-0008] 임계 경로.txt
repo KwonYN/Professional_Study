@@ -1,0 +1,128 @@
+﻿// (중상) [교육P-0008] 임계 경로
+/*
+    【 문제 이해 】
+    N개의 공정, 그 사이의 M개의 작업 관계(작업시간)
+    i보다 낮은 공정들 중, i와 연결되어 있는(?) 모든 작업이 끝나야 i를 수행할 수 있음
+    이 때, N작업까지 끝냈을 때까지의 최소시간?
+
+    【 문제 풀이 】
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX    (100000)
+#define INF     (0x7fffffff)
+
+typedef pair<int, int> pii;
+int T, N, M;
+int indegree[NMAX+5];
+vector<pii> edges[NMAX+5];
+int min_time[NMAX+5];
+
+void init() {
+    for (int i = 1; i <= N; i++) {
+        indegree[i] = 0;
+        edges[i].clear();
+        min_time[i] = -1;
+    }
+}
+
+void input() {
+    int a, b, c;
+    scanf("%d %d", &N, &M);
+    init();
+    for (int i = 1; i <= M; i++) {
+        scanf("%d %d %d", &a, &b, &c);
+        edges[a].push_back({c, b});
+        indegree[b]++;
+    }
+}
+
+void operating() {
+    //for(int i = 1 = i <= N; i++) if(!indegree[i]) q.push({0, i});
+    queue<pii> q;
+    q.push({ 0, 1 });      min_time[1] = 0;
+    while (!q.empty()) {
+        pii node = q.front();    q.pop();
+        for (pii next : edges[node.second]) {
+            min_time[next.second] = max(min_time[next.second], next.first + node.first);
+            if (--indegree[next.second] == 0) {
+                q.push({ min_time[next.second], next.second });
+            }
+        }
+    }
+}
+
+void output(int tc) { printf("#%d %d\n", tc, min_time[N]); }
+
+int main() {
+    //freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        operating();
+        output(tc);
+    }
+    return 0;
+}
+#endif
+
+// 이전 코드
+#if 0
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <queue>
+using namespace std;
+#define NMAX	(100000)
+#define MMAX	(300000)
+
+int T, N, M;
+int indegree[NMAX + 10];
+vector<pair<int, int>> edges[NMAX + 2];
+int t[NMAX+10];
+queue<int> que;
+
+int main()
+{
+	ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+
+	int a, b, c, out;
+	cin >> T;
+	for (int tc = 1; tc <= T; tc++)
+	{
+		
+		cin >> N >> M;
+		for (int i = 1; i <= N; i++) {
+			indegree[i] = 0;
+			edges[i].clear();
+			t[i] = 0;
+		}
+		for (int i = 1; i <= M; i++)
+		{
+			cin >> a >> b >> c;
+			edges[a].push_back({ b, c });
+			indegree[b]++;
+		}
+		for (int i = 1; i <= N; i++) {
+			if (indegree[i] == 0) que.push(i);
+		}
+		while (!que.empty()) {
+			int out = que.front();	que.pop();
+			if (out == N) break;
+			for (pair<int, int> next : edges[out]) {
+				t[next.first] = max(t[next.first], t[out] + next.second);
+				if (--indegree[next.first] == 0) que.push(next.first);
+			}
+		}
+
+		cout << "#" << tc << " " << t[N] << "\n";
+	}
+
+	return 0;
+}
+#endif

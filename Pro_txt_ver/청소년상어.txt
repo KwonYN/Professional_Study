@@ -1,0 +1,78 @@
+// 청소년 상어
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+
+struct FISH { int y, x, dir; bool isDead; };
+FISH fish[18];
+FISH shark;
+int map[5][5];
+int dy[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+int dx[8] = { 0, -1, -1, -1, 0, 1, 1, 1 };
+int cnt;
+
+void input() {
+	int a, b;
+	cnt = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			scanf("%d %d", &a, &b);
+			fish[a] = { i, j, --b, false };
+			map[i][j] = a;
+		}
+	}
+}
+
+int get_dir(int d) {
+	if (++d >= 8) d -= 8;
+	return d;
+}
+
+void move_fish() {
+	int ny, nx, nd, fish_tmp, map_tmp;
+	bool end_flag;
+	FISH tmp = { 0, 0, 0, false };
+	for (int i = 1; i <= 16; i++) {
+		if (fish[i].isDead) continue;
+		end_flag = true;
+		nd = fish[i].dir;
+		for (int j = 0; j < 8; j++) {
+			ny = fish[i].y + dy[nd];		nx = fish[i].x + dx[nd];
+			if (ny < 0 || ny > 4 || nx < 0 || nx > 4 || !map[ny][nx]) nd = get_dir(nd);
+			else {
+				end_flag = false;
+				break;
+			}
+		}
+		if (end_flag) continue;
+		tmp = fish[i];		fish_tmp = map[ny][nx];
+		map_tmp = map[tmp.y][tmp.x];	
+		map[tmp.y][tmp.x] = map[ny][nx];
+		map[ny][nx] = map_tmp;
+		fish[i] = fish[fish_tmp];
+		fish[fish_tmp] = tmp;
+	}
+}
+
+void move_shark() {
+	;
+}
+
+void eat_fish_fat_shark() {
+	shark = { 0, 0, fish[map[0][0]].dir, false };
+	fish[map[0][0]].isDead = true;	cnt++;
+	map[0][0] = 0;
+	while (!shark.isDead || cnt == 16) {
+		move_fish();
+	}
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	input();
+	eat_fish_fat_shark();
+	return 0;
+}
+#endif

@@ -1,0 +1,200 @@
+﻿// (중상) [기출P-0058] 탱크
+/*
+	【 문제 이해 】
+	모든 탱크에 대하여
+	한 탱크(점수 : S)의
+	왼쪽 아래 방향에 위치한 모든 탱크들의 점수는 S보다 크다.
+	오른쪽 위 방향에 위치한 모든 탱크들 중 S보다 작은 점수모두 합산!
+	(※ 탱크 공격해도 어떤 변화도 생기지 않음 주의!)
+	(※ 두 탱크가 동일한 x좌표나 y좌표에 위치하는 경우 없음!!!!!)
+	(※ 같은 점수를 가지고 있는 탱크 또한 없음!!!!!)
+
+	【 풀이 생각 】
+	1. 2차원 좌표(y, x)이니까 인덱스트리를 두 개 만들어서 각 좌표를 넣어주면 되지 않을까?
+		=> x보다 크고 y보다 크지만, score 또한 큰 경우를 솎아내기 어려움
+		   하나씩 비교를 한다면, 결국엔 1차원 배열 두 개로 하는 것과 다르지 않음
+	2. Leaf Node에 공격하는 탱크를 기준으로
+	   3사분면 ~ 그 탱크 ~ 1사분면... 이렇게 Tree를 만들준다?
+		=> 좌상 ~ 우하의 y = -x 그래프 형태로 노드가 주어진다면
+		   Tree에 들어가는 것이 없게됨...
+	3. Indexed Tree를 왜 사용할까 생각을 하게 됨
+		=> "순서"를 갖는 정보들이 있을 때,
+		   "구간"의 대표값이나 합/곱 등의 "연산"결과를 빠르게 얻을 수 있음
+
+	▼
+	  (y부터 해도 됨!)
+	4. x(오름차순)를 기준으로 maldan ~ maldan + N - 1까지 깔아주고,
+	   y가 큰 순으로(내림차순) 그 y에 대응되는 x값을 Indexed Tree에서 확인,
+	   그 후에 거기서부터 leaf node의 마지막(x값이 가장 큰 노드)까지의 구간 합을 구해준다면?
+	   (단, Tree의 leaf node에 기록되는 대표값은 (x, y)의 score이고,
+	   위로 타고 올라가면서 += score을 해주면서 구간합을 구할 수 있도록 해줌!)
+		
+		=> 어떻게 가능?
+		: 구하고자 하는 것이 임의의 (x, y)를 기준으로
+		이 노드보다 x, y 모두 큰 노드들의 score 중
+		이 노드의 score보다 작은 것들의 합!
+		: x 오름차순 정렬을 해서 leaf node에 깔아줌으로써 1, 4사분면을 확인할 수 있고,
+		  y 내림차순 정렬 후, 순서대로 넣어줌으로써 1사분면의 score을 솎아낼 수 있음!
+		  (이미 x는 오름차순으로 깔려있고, y가 큰 순으로 들어오므로
+		  그 노드 기준으로 1사분면에 있는 노드들을 찾아낼 수 있고,
+		  문제의 "왼쪽 아래 방향의 탱크의 점수가 크다는 것 보장"에서
+		  1사분면에 있는 score이 다 작음이 보장됨!)
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX    (100000)
+#define XYMAX   (1000000)
+
+typedef long long ll;
+int T, N, maldan;
+bool x[XYMAX + 5];
+pair<bool, pair<int, int>> y[XYMAX + 5];// 정렬을 해주기 위함(x - 오름, y - 내림)
+int sort_x[XYMAX + 5], sort_y[NMAX + 5];
+ll tree[NMAX*4+5];	// 인덱스드트리 (x좌표 기준으로) - y좌표는 구간합 때 씀!
+ll get_sum;
+
+void init() {	// 초기화
+	get_sum = 0LL;
+	for (int i = 1; i <= XYMAX; i++) {
+		x[i] = false; 
+		y[i] = { false, {0, 0} };
+		sort_x[i] = 0;
+		if (i >= N) continue;
+		sort_y[i] = 0;
+	}
+	// tree 초기화
+	for (maldan = 1; maldan < N; maldan <<= 1);
+	for (int i = 1; i < maldan << 1; i++) tree[i] = 0LL;
+}
+
+void sort_xy() {	// x, y 정렬해주기 위함
+	int cnt = 0;
+	for (int i = 1; (cnt < N) && (i <= XYMAX); i++) {
+		if (!x[i]) continue;
+		sort_x[i] = cnt++;
+	}	// tree[maldan+i]의 value는 sort_x[i]임!
+	cnt = 0;
+	for (int i = 1; (cnt < N) && (i <= XYMAX); i++) {
+		if (!y[i].first) continue;
+		sort_y[cnt++] = i;
+	}	// 이후 y[sort_y[i]].second.first로 x에 접근!
+	 	// 이후 y[sort_y[i]].second.second로 score에 접근!
+}
+
+void input() {
+	int a, b, c;
+	scanf("%d", &N);
+	init();
+	for (int i = 1; i <= N; i++) {
+		scanf("%d %d %d", &a, &b, &c);
+		x[a]=true;		y[b].first=true;
+		y[b] = { true, {a, c} };
+	}
+	sort_xy();
+}
+
+void attack_tank(int leaf_x_node, int leaf_score) {	// make tree && get total score
+	int left = leaf_x_node, right = maldan + N - 1;
+	// leaf_x_node ~ 끝 노드까지의 구간 합 구하기
+	while (left <= right) {
+		if (left & 1) get_sum += (1LL * tree[left++]);
+		if (!(right & 1)) get_sum += (1LL * tree[right--]);
+		left >>= 1;		right >>= 1;
+	}
+	// leaf_x_node에 leaf_score를 갱신해준 후, 위로 쭉 올라가면서 갱신
+	while (leaf_x_node >= 1) {
+		tree[leaf_x_node] += (1LL * leaf_score);
+		leaf_x_node >>= 1;
+	}
+}
+
+void operation() {
+	for (int i = N - 1; i >= 0; i--) {
+		attack_tank(maldan+sort_x[y[sort_y[i]].second.first],
+					y[sort_y[i]].second.second);
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, get_sum); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		operation();
+		output(tc);
+	}
+	return 0;
+}
+#endif
+
+// sovley 코드
+#if 0
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+
+using namespace std;
+
+struct tank {
+	int x, y, score;
+};
+bool cmp(const tank& u, const tank& v) {
+	return u.x > v.x;
+}
+
+vector<long long> tree;
+int N, MAX_XY = 1000000, TREE_SIZE = 1 << ((int)ceil(log2(MAX_XY)) + 1);
+tank tanks[100000];
+
+void update(int node, int start, int end, int idx, int val) {
+	if (idx < start || idx > end)
+		return;
+	tree[node] += val;
+	if (start != end) {
+		update(2 * node, start, (start + end) / 2, idx, val);
+		update(2 * node + 1, (start + end) / 2 + 1, end, idx, val);
+	}
+}
+
+long long query(int node, int start, int end, int i, int j) {
+	if (j < start || end < i)
+		return 0;
+	if (i <= start && end <= j)
+		return tree[node];
+	return query(2 * node, start, (start + end) / 2, i, j) + query(2 * node + 1, (start + end) / 2 + 1, end, i, j);
+}
+
+int main() {
+	ios_base::sync_with_stdio(false); cin.tie(NULL);
+	int T;
+	cin >> T;
+	for (int tc = 1; tc <= T; tc++) {
+		tree.clear();
+		tree.resize(TREE_SIZE);
+		cin >> N;
+		for (int i = 0; i < N; i++) {
+			int x, y, score;
+			cin >> x >> y >> score;
+			tanks[i] = { x, y, score };
+		}
+		sort(tanks, tanks + N, cmp);
+
+		long long ans = 0;
+		for (int i = 0; i < N; i++) {
+			int idx = tanks[i].y, val = tanks[i].score;
+			update(1, 1, MAX_XY, idx, val);
+			ans += query(1, 1, MAX_XY, idx + 1, MAX_XY);
+		}
+		cout << '#' << tc << ' ' << ans << '\n';
+	}
+
+	return 0;
+}
+
+#endif

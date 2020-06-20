@@ -1,0 +1,252 @@
+﻿// (중상) [연습P-0008] 웜홀
+/*
+    【 문제 이해 】
+    N개 농장(1~N 넘버링), M개 양방향 길, W개 웜홀(단방향 길, 이전 시간으로 되돌려줌)
+    현재 위치 -> ... -> 현재위치일 때, 시간이 되돌아가있나?
+
+    【 풀이 】
+    가장 첫 번째 주어졌던 경로부터 시작한다고 하자!
+    N-1번 : 모든 노드에서 출발하여 연결된 노드까지 한 칸씩 가자!
+    마지막으로 다시 한 번 더 반복
+    이 때, 갱신된 time_chk이 있다면 flag을 true로 바꿔주면서 끝!
+*/
+// 이렇게 푸는 것이 맞지 않을까 싶은데?
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX    (500)
+#define MMAX    (2500)
+#define WMAX    (2500)
+#define INF     (0x7fffffff)
+ 
+typedef pair<long long, pair<int, int>> plpii;
+int T, N, M, W;
+long long time_chk[NMAX+5];
+plpii edges[2*MMAX+WMAX+5];
+bool flag;
+ 
+void init() {   // 초기화
+    flag = false;
+    for (int i = 1; i <= N; i++) {
+        time_chk[i] = 1LL * INF;
+    }
+}
+ 
+void input() {
+    int s, e;       long long t;
+    scanf("%d %d %d", &N, &M, &W);
+    init();
+    for (int i = 1; i <= M; i++) {
+        scanf("%d %d %lld", &s, &e, &t);
+        edges[2*i-1] = { t, { s, e } };
+        edges[2*i] = { t, { e, s } };
+    }
+    for (int i = 1; i <= W; i++) {
+        scanf("%d %d %lld", &s, &e, &t);
+        edges[i + 2*M] = { -t, { s, e } };
+    }
+}
+ 
+void bellman_ford() {
+    long long tmp;
+    plpii node;
+    time_chk[edges[1].second.first] = 0LL;
+    for (int i = 1; i < N; i++) {   // N-1번
+        for (int j = 1; j <= 2 * M + W; j++) {  // 주어진 도로와 웜홀 모두 처리
+            node = edges[j];
+            tmp = time_chk[node.second.first] + 1LL *  node.first;
+            if (time_chk[node.second.second] > tmp) {
+                time_chk[node.second.second] = tmp;
+            }
+        }
+        /*printf("[%d]", i);
+        for (int k = 1; k <= N; k++) {
+            printf(" %2lld", time_chk[k]);
+        }
+        printf("\n");*/
+    }
+    for (int j = 1; j <= 2 * M + W; j++) {  // 주어진 도로와 웜홀 모두 처리
+            node = edges[j];
+            tmp = time_chk[node.second.first] + 1LL *  node.first;
+            if (time_chk[node.second.second] > tmp) {
+                flag = true;
+                break;
+            }
+    }
+    /*printf("[%d]", N);
+    for (int k = 1; k <= N; k++) {
+        printf(" %2lld", time_chk[k]);
+    }
+    printf("\n");*/
+ 
+}
+ 
+void output(int tc) { printf("#%d %s\n", tc, (flag ? "YES" : "NO")); }
+ 
+int main() {
+    //freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        bellman_ford();
+        output(tc);
+    }
+    return 0;
+}
+
+#endif
+
+
+// 두 번째 코드
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX    (500)
+#define MMAX    (2500)
+#define WMAX    (2500)
+#define INF     (0x7fffffff)
+
+typedef pair<int, pair<int, int>> pipii;
+int T, N, M, W;
+int time_chk[NMAX+5];
+pipii edges[2*MMAX+WMAX+5];
+bool flag;
+
+void init() {   // 초기화
+    flag = false;
+    for (int i = 1; i <= N; i++) {
+        time_chk[i] = INF;
+    }
+}
+
+void input() {
+    int s, e, t;
+    scanf("%d %d %d", &N, &M, &W);
+    init();
+    for (int i = 1; i <= M; i++) {
+        scanf("%d %d %d", &s, &e, &t);
+        edges[2*i-1] = { t, { s, e } };
+        edges[2*i] = { t, { e, s } };
+    }
+    for (int i = 1; i <= W; i++) {
+        scanf("%d %d %d", &s, &e, &t);
+        edges[i + 2*M] = { -t, { s, e } };
+    }
+}
+
+void bellman_ford() {
+    int tmp;
+    pipii node;
+    time_chk[edges[1].second.first] = 0;
+    for (int i = 1; i < N; i++) {   // N-1번
+        for (int j = 1; j <= 2 * M + W; j++) {  // 주어진 도로와 웜홀 모두 처리
+            node = edges[j];
+            if (time_chk[node.second.first] == INF) continue;
+            tmp = time_chk[node.second.first] + node.first;
+            if (time_chk[node.second.second] > tmp) {
+                time_chk[node.second.second] = tmp;
+            }
+        }
+        /*printf("[%d]", i);
+        for (int k = 1; k <= N; k++) {
+            printf(" %2d", time_chk[k]);
+        }
+        printf("\n");*/
+    }
+    for (int j = 1; j <= 2 * M + W; j++) {  // 주어진 도로와 웜홀 모두 처리
+        node = edges[j];
+        if (time_chk[node.second.first] == INF) continue;
+        tmp = time_chk[node.second.first] + node.first;
+        if (time_chk[node.second.second] > tmp) {
+            flag = true;
+            break;
+        }
+    }
+    /*printf("[%d]", N);
+    for (int k = 1; k <= N; k++) {
+        printf(" %2d", time_chk[k]);
+    }
+    printf("\n");*/
+
+}
+
+void output(int tc) { printf("#%d %s\n", tc, (flag ? "YES" : "NO")); }
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        bellman_ford();
+        output(tc);
+    }
+    return 0;
+}
+#endif
+
+// 이전 코드
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(500)
+#define MMAX	(2500)
+#define WMAX	(200)
+#define INF		(0x7fffffff)
+
+typedef pair<int, pair<int, int>> pipii;
+
+int T, N, M, W;
+pipii edges[MMAX*2 + WMAX + 5];
+int d[NMAX + 5];
+
+void init() {
+	for (int i = 1; i <= N; i++) {
+		d[i] = INF;
+	}
+	d[1] = 0;
+}
+
+int main() {
+	int s, e, t;
+	scanf("%d", &T); 
+	for (int tc = 1; tc <= T; tc++) {
+		scanf("%d %d %d", &N, &M, &W);
+		init();
+		for (int i = 0; i < M; i++) {
+			scanf("%d %d %d", &s, &e, &t);
+			edges[i * 2] = { t, {s, e} };
+			edges[i * 2 + 1] = { t, {e, s} };
+		}
+		for (int i = 2 * M; i < 2 * M + W; i++) {
+			scanf("%d %d %d", &s, &e, &t);
+			edges[i] = { -t, {s, e} };
+		}
+
+
+		int a, b, c;
+		bool minusCycle = false;
+		for (int i = 1; i < N; i++) {	// 모든 정점에 대하여
+			for (int j = 0; j < 2 * M + W; j++) {
+				a = edges[j].second.first;	// s
+				b = edges[j].second.second;	// e
+				c = edges[j].first;			// t
+				if (d[a] != INF) d[b] = min(d[b], d[a] + c);
+			}
+		}
+		for (int j = 0; j < 2 * M + W; j++) { // 다시 한 번 돌려보자!
+			a = edges[j].second.first;
+			b = edges[j].second.second;
+			c = edges[j].first;
+			if (d[a] != INF && d[a] + c < d[b]) {
+				minusCycle = true;		break;
+			}
+		}
+		if (minusCycle) printf("#%d %s\n", tc, "YES");
+		else printf("#%d %s\n", tc, "NO");
+	}
+	return 0;
+}

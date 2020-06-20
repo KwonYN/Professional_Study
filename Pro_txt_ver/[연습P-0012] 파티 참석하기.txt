@@ -1,0 +1,116 @@
+// [연습P-0012] 파티 참석하기
+/*
+    【 IDEA 1 】: 시간복잡도가...
+    - s -[t]-> e를
+      edges[s].push_back({ t, e });로 받아줌
+    - 우선 X번방에서부터 Dijkstra를 끝까지 돌려
+      come_back[]배열에 X로부터 i까지의 최단거리를 저장
+      : 이후 i번 친구가 X번으로 왔다가 돌아갈 때 사용
+    - 1 ~ N번방(X번방 제외)의 친구들이 X번방을 목적지로 하여
+      Dijkstra를 돌림 (즉, 총 N-1번이 되겠지?)
+      : i번 친구가 X번으로 가는 시간
+    => 하지만 다익스트라 최악의 시간복잡도 O(E * log(E))
+       (N-1) * E * log(E) + E * log(E) = N * E * log(E)
+                                       = 5만 * 50만 * log(50만)
+                                       = 5만 * 50만 * 16
+                                       = 4천억........
+
+    【 IDEA 2 】
+    - s -[t]-> e를
+      edges[s].push_back( { t, e } );와
+      edges2[e].push_back( { t, s } );로 받아줌!!!
+      => edges는 되돌아올 때.
+         edges2는 X번방까지 갈 때 사용
+    - 우선 X번방에서부터 Dijkstra를 끝까지 돌려
+      come_back[]배열에 X로부터 i까지의 최단거리를 저장
+      : 이후 i번 친구가 X번으로 왔다가 돌아갈 때 사용
+    - IDEA1과 반대로 edges2를 이용하여
+      위의 Dijkstra와 반대로 X -> i까지의 최단거리가 아니라
+      i -> X까지의 최단거리를 만들어줌!! ( go[]배열에 최단거리 저장 )
+      : edges와 반대로 거꾸로 저장해주었기 때문에 가능!!
+    => 시간복잡도 :
+       E * log(E) * 2 = 50만 * 2 * 16 = 1600만!!!!!
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX    (50000)
+#define MMAX    (500000)
+#define INF     (0x7fffffff)
+
+typedef pair<int, int> pii;
+int T, N, M, party_room, last_arrv;
+vector<pii> edges[NMAX+5], edges2[NMAX+5];
+int go[NMAX + 5], come_back[NMAX+5];
+
+void init() {
+    last_arrv = -1;
+    for (int i = 1; i <= N; i++) {
+        edges[i].clear();       edges2[i].clear();
+        go[i] = come_back[i] = INF;
+    }
+}
+
+void input() {
+    int s, e, t;
+    scanf("%d %d %d", &N, &M, &party_room);
+    init();
+    for (int i = 1; i <= M; i++) {
+        scanf("%d %d %d", &s, &e, &t);
+        edges[s].push_back({ t, e });   // "s" -[t]-> e
+        edges2[e].push_back({ t, s });  // s -[t]-> "e"
+    }
+}
+
+void make_come_back() {
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    pq.push({ 0, party_room });     come_back[party_room] = 0;
+    while (!pq.empty()) {
+        pii node = pq.top();       pq.pop();
+        for (pii next : edges[node.second]) {
+            if (come_back[next.second] > come_back[node.second] + next.first) {
+                come_back[next.second] = come_back[node.second] + next.first;
+                pq.push({ come_back[next.second], next.second });
+            }
+        }
+    }
+}
+
+void go_party() {
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    pq.push({ 0, party_room });     go[party_room] = 0;
+    while (!pq.empty()) {
+        pii node = pq.top();       pq.pop();
+        for (pii next : edges2[node.second]) {
+            if (go[next.second] > go[node.second] + next.first) {
+                go[next.second] = go[node.second] + next.first;
+                pq.push({ go[next.second], next.second });
+            }
+        }
+    }
+}
+
+void output(int tc) { 
+    for (int i = 1; i <= N; i++) {
+        if (go[i] == INF || come_back[i] == INF) continue;
+        if (last_arrv < go[i] + come_back[i]) last_arrv = go[i] + come_back[i];
+    }
+    printf("#%d %d\n", tc, last_arrv);
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        make_come_back();
+        go_party();
+        output(tc);
+    }
+    return 0;
+}
+#endif

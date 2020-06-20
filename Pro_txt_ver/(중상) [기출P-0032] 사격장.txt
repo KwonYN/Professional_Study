@@ -1,0 +1,82 @@
+// (중상) [기출P-0032] 사격장
+/*
+	1) l에 맞춰서 점수 얻을 수 있나? (전에 안 맞춘 것인가?)
+	2) l == r인가?
+	3) l이 이전의 r과 같은가? (그럼 자기 자신을 바라보고 있을 거잖아?)
+	4) 
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100000)
+#define MMAX	(100000)
+							// 손님
+int T, N, M, parent[NMAX+5], customer[MMAX+5];
+			// 점수판(과녁)
+bool chk[NMAX+5];
+
+int find(int v) {
+	if (parent[v] == v) return v;
+	return parent[v] = find(parent[v]);
+}
+
+void _union(int v1, int v2) {
+	v1 = find(v1);
+	v2 = find(v2);
+	/*if (v1 < v2) parent[v1] = v2;
+	else parent[v2] = v1;*/
+	parent[v1] = v2;
+}
+
+bool chk_dup(int v1, int v2) {	// 중복 확인
+	return find(v1) == find(v2);
+}
+
+void input_init_operation() {
+	int l, r, score;
+	scanf("%d %d", &N, &M);
+	for (int i = 1; i <= N; i++) {	// 초기화
+		parent[i] = i;		chk[i] = false;
+	}
+	for (int i = 1; i <= M; i++) {
+		scanf("%d %d", &l, &r);
+		score = 0;
+		l = find(l);	// 시작점을 찾아줌
+		if (!chk[l]) { chk[l] = true;  score++; }
+		while (l < r) {
+			if (!chk_dup(l, l + 1)) {
+				_union(l, l + 1);
+				if (!chk[l + 1]) {
+					chk[l + 1] = true;
+					score++;
+				}
+				//printf("%d -> %d\n", l, l + 1);
+			}
+			l = find(l);
+		}
+		customer[i] = score;
+		//printf("%d\n", score);
+	}
+}
+
+void output(int tc) { 
+	int result = 0;
+	for (int i = 1; i <= M; i++) {
+		if (i & 1) result += customer[i];
+		else result -= customer[i];
+	}
+	printf("#%d %d\n", tc, result);
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input_init_operation();
+		output(tc);
+	}
+	return 0;
+}
+#endif

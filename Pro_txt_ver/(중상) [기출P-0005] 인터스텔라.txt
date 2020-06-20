@@ -1,0 +1,73 @@
+// (중상) [기출P-0005] 인터스텔라
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX    (100000)
+
+typedef long long ll;
+typedef pair<ll, int> pli;
+int T, N, M, K, ss, ee;
+long long dist[NMAX + 5][4];
+vector<pli> edges[NMAX + 5];
+ll MAX_DIST = 1LL * 100000 * 200000 + 1LL;
+
+void input() {
+    int a, b, c;
+    scanf("%d %d %d", &N, &M, &K);
+    for (int i = 1; i <= N; i++) {    // 초기화
+        for (int j = 0; j <= K; j++) dist[i][j] = MAX_DIST;
+        edges[i].clear();
+    }
+    for (int i = 1; i <= M; i++) {
+        scanf("%d %d %d", &a, &b, &c);
+        edges[a].push_back({ 1LL * c, b });
+        edges[b].push_back({ 1LL * c, a });
+    }
+    scanf("%d %d", &ss, &ee);
+}
+
+void dijkstra() {
+    priority_queue<pair<pli, int>, vector<pair<pli, int>>, greater<pair<pli, int>>> pq;
+    pq.push({ { 0LL, ss }, 0 });     dist[ss][0] = 0LL;
+    while (!pq.empty()) {
+        //ll d = pq.top().first.first;
+        int node = pq.top().first.second;
+        int k = pq.top().second;        pq.pop();
+        if (node == ee) return;
+        for (pli next : edges[node]) {
+            if (dist[next.second][k] > dist[node][k] + 1LL * next.first) {
+                dist[next.second][k] = dist[node][k] + 1LL * next.first;
+                pq.push({ { dist[next.second][k], next.second }, k });
+            }
+            for (int i = 1; i <= K; i++) {
+                if (k + i > K) continue;
+                if (dist[next.second][k+i] > dist[node][k] + 1LL) {
+                    dist[next.second][k+i] = dist[node][k] + 1LL;
+                    pq.push({ { dist[next.second][k+i], next.second }, k+i });
+                }
+            }
+        }
+    }
+}
+
+void output(int tc) { 
+    ll min_dist = MAX_DIST;
+    for (int i = 0; i <= K; i++) if (min_dist > dist[ee][i]) min_dist = dist[ee][i];
+    printf("#%d %lld\n", tc, min_dist);
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        dijkstra();
+        output(tc);
+    }
+    return 0;
+}
+#endif

@@ -1,0 +1,65 @@
+// (중상) [교육P-0006] 가장 먼 두 도시
+/*
+    【 문제 이해 】
+    N개 도시 : 1~N 넘버링 && 두 도시 사이에는 항상 도로가 있음
+                             a->b와 b->a 길이가 다를 수 있음
+    거리 : a -> b를 하나 이상의 도로를 거쳐 가는 여러 가지 방법들 중 가장 길이가 짧은 것!
+    도시 간 거리(가장 짧은 길이)가 가장 긴 곳?
+
+    【 풀이 】
+    ㅇ
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX    (300)
+
+int T, N;   // N : ~300 (N^3도 가능)
+int dist_adj[NMAX+5][NMAX+5];
+int max_dist;
+
+void input() {
+    max_dist = -1;
+    scanf("%d", &N);
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
+            scanf("%d", &dist_adj[i][j]);
+        }
+    }
+}
+
+void floyd_warshall() {
+    for (int k = 1; k <= N; k++) {
+        for (int i = 1; i <= N; i++) {      // 출발지
+            for (int j = 1; j <= N; j++) {  // 목적지
+                if(i == j) continue;
+                if (dist_adj[i][j] > dist_adj[i][k] + dist_adj[k][j]) {
+                    dist_adj[i][j] = dist_adj[i][k] + dist_adj[k][j];
+                }
+            }
+        }
+    }
+}
+
+void output(int tc) {
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
+            if (max_dist < dist_adj[i][j]) max_dist = dist_adj[i][j];
+        }
+    }
+    printf("#%d %d\n", tc, max_dist);
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        input();
+        floyd_warshall();
+        output(tc);
+    }
+    return 0;
+}
+#endif

@@ -1,0 +1,572 @@
+// (중상) [기출P-0037] 섬나라
+
+// 1차 시도
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMMAX	(500)
+#define QMAX	(100000)
+
+typedef struct { int y, x; }NODE;
+int T, N, M, Q;
+int island[NMMAX+5][NMMAX+5];
+vector<NODE> q[QMAX+5];
+bool chk[QMAX+5];
+int input_num[QMAX+5];
+int cnt_island[QMAX+5];
+
+
+void init() {
+	for(int i = 1; i <= QMAX; i++) {
+		q[i].clear();
+		chk[i] = false;
+		input_num[i] = 0;
+		cnt_island[i] = 0;
+	}
+}
+
+int main() {
+	int tmp;
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		// 초기화
+		init();
+		// 입력
+		scanf("%d %d", &N, &M);
+		for(int i = 1; i <= N; i++) {
+			for(int j = 1; j <= M; j++) {
+				scanf("%d", &island[i][j]);
+				q[island[i][j]].push_back( { i, j } );
+			}
+		}
+		scanf("%d", &Q);
+		for(int i = 1; i <= Q; i++) {
+			scanf("%d", &tmp);
+			if(!chk[tmp]) {
+				chk[tmp] = true;
+				input_num[i] = tmp; // 중복제거
+				for(NODE cur : q[tmp]) {
+					island[cur.y][cur.x] = -1;
+				}
+			}
+			else input_num[i] = 0;
+		}
+		// 섬 넘버링 : 현재 다 파괴한 상태이므로, 남아있는 -1이 아닌 양수들의 군집을 섬으로 간주하고, Union 해주어야 함!
+		
+
+		// num_cnt ~ 1까지 섬을 복원해주면서, 복원된 땅의 사방에 있는 섬과 Union -> 거꾸로 섬의 개수 저장해줌(cnt_island[i])
+		// input_num[i] == 0이면 continue로 넘어가줌
+		
+
+		// 
+		
+
+		// 출력
+		printf("#%d", tc);
+		for(int i = 1; i <= Q; i++) {
+			if(cnt_island[i] == 0) printf(" %d", cnt_island[i] = cnt_island[i-1]);
+			else printf(" %d", cnt_island[i]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
+
+
+
+
+// 2차 시도
+// (중상) [기출P-0037] 섬나라
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMMAX	(500)
+#define QMAX	(100000)
+
+typedef struct { int y, x; }NODE;
+int T, N, M, Q, numbering;
+int island[NMMAX + 5][NMMAX + 5], see[NMMAX*NMMAX+5];
+vector<NODE> q[QMAX + 5];
+bool chk_dup[QMAX + 5];
+int visited[NMMAX + 5][NMMAX + 5];
+int input_num[QMAX + 5];
+int cnt_island[QMAX + 5];
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 };
+
+void init() {
+	numbering = 0;
+	for (int i = 1; i <= QMAX; i++) {
+		q[i].clear();
+		chk_dup[i] = false;
+		cnt_island[i] = input_num[i] = 0; // 굳이 해주지 않아도 될듯
+	}
+}
+
+void input() {
+	int tmp;
+	scanf("%d %d", &N, &M);
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= M; j++) {
+			scanf("%d", &island[i][j]);
+			see[M * (i-1) + j] = M * (i - 1) + j; // 초기화
+			q[island[i][j]].push_back({ i, j });
+			visited[i][j] = -1;
+		}
+	}
+	// 테두리
+	for (int i = 0; i <= N + 1; i++) island[i][0] = island[i][M + 1] = -1;
+	for (int i = 0; i <= M + 1; i++) island[0][i] = island[N + 1][i] = -1;
+	scanf("%d", &Q);
+	for (int i = 1; i <= Q; i++) {
+		scanf("%d", &tmp);
+		if (!chk_dup[tmp]) {
+			chk_dup[tmp] = true;
+			input_num[i] = tmp; // 중복제거
+			for (NODE cur : q[tmp]) {
+				island[cur.y][cur.x] = -1; // 파괴
+			}
+		}
+		else input_num[i] = 0;
+	}
+}
+
+int find(int v) {
+	if (see[v] == v) return v;
+	return see[v] = find(see[v]);
+}
+
+void _union(int v1, int v2) {
+	v1 = find(v1);
+	v2 = find(v2);
+	see[v1] = v2;
+}
+
+void bfs(int y, int x) {
+	queue<NODE> que;
+	int ny, nx;
+	que.push({ y, x });		visited[y][x] = ++numbering;
+	while (!que.empty()) {
+		NODE out = que.front();			que.pop();
+		for (int d = 0; d < 4; d++) {
+			ny = out.y + dy[d];
+			nx = out.x + dx[d];
+			// 파괴됐거나 방문되지 않은 곳(파괴ed)이라면
+			// (island는 번호를 담기 위함이고, visited는 섬의 numbering을 담당)
+			// 따라서 visited의 번호를 가지고 union, find를 해주는 것!!
+			if (island[ny][nx] == -1 || visited[ny][nx] != -1) continue;
+			que.push({ny, nx});
+			visited[ny][nx] = numbering;
+		}
+	}
+}
+
+void output(int t) {
+	printf("#%d", t);
+	for (int i = 1; i <= Q; i++) {
+		/*if (input_num[i] == 0) printf(" %d", cnt_island[i - 1]);
+		else printf(" %d", cnt_island[i]);*/
+		printf(" %d", cnt_island[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		// 초기화
+		init();
+		// 입력
+		input();
+		/*for (int i = 1; i <= N; i++) {
+			for (int j = 1; j <= M; j++) {
+				printf("%d ", island[i][j]);
+			}
+			printf("\n");
+		}*/
+		// 섬 넘버링 : 현재 다 파괴한 상태이므로, 남아있는 -1이 아닌 양수들의 군집을 섬으로 간주하고, Union 해주어야 함!
+		for (int i = 1; i <= N; i++) {
+			for (int j = 1; j <= M; j++) {
+				if (island[i][j] == -1 || visited[i][j] != -1) continue;
+				bfs(i, j);
+			}
+		}
+		cnt_island[Q] = numbering;
+		// num_cnt ~ 1까지 섬을 복원해주면서, 복원된 땅의 사방에 있는 섬과 Union -> 거꾸로 섬의 개수 저장해줌(cnt_island[i])
+		// input_num[i] == 0이면 continue로 넘어가줌
+		int ny, nx, num;
+		for (int i = Q; i >= 1; i--) {
+			num = input_num[i];
+			if (num == 0) {
+				cnt_island[i-1] = cnt_island[i];
+				continue;
+			}
+			else {
+				for (NODE cur : q[num]) {
+					island[cur.y][cur.x] = num;
+					for (int d = 0; d < 4; d++) {
+						ny = cur.y + dy[d];
+						nx = cur.x + dx[d];
+						if (island[ny][nx] == -1 || visited[ny][nx] == -1) continue;
+						// 복원된 노드를 중심으로 상하좌우를 보되
+						// 같은 섬인지(대표자 노드가 같은지), 다른 섬인지(대표자 노드가 다른지)를 확인 후
+						// 같으면 섬 수 그대로, 다르면 섬 수 -1
+						;
+					}
+				}
+				cnt_island[i-1] = numbering;
+			}
+		}
+		// 출력
+		output(tc);
+	}
+	return 0;
+}
+#endif
+
+
+
+
+// 3차 시도
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMMAX	(500)
+#define QMAX	(100000)
+
+typedef struct { int y, x; }NODE;
+int T, N, M, Q, numbering;
+int island[NMMAX + 5][NMMAX + 5], see[NMMAX*NMMAX+5];
+vector<NODE> q[QMAX + 5];
+bool chk_dup[QMAX + 5];
+int visited[NMMAX + 5][NMMAX + 5];
+int input_num[QMAX + 5];
+int cnt_island[QMAX + 5];
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 };
+
+void init() {
+	numbering = 0;
+	for (int i = 1; i <= QMAX; i++) {
+		q[i].clear();
+		chk_dup[i] = false;
+		cnt_island[i] = input_num[i] = 0; // 굳이 해주지 않아도 될듯
+		see[i] =i; // 초기화
+	}
+	for (int i = QMAX + 1; i <= NMMAX * NMMAX; i++) see[i] = i;
+}
+
+void input() {
+	int tmp;
+	scanf("%d %d", &N, &M);
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= M; j++) {
+			scanf("%d", &island[i][j]);
+			q[island[i][j]].push_back({ i, j });
+			visited[i][j] = -1;
+		}
+	}
+	// 테두리
+	for (int i = 0; i <= N + 1; i++) island[i][0] = island[i][M + 1] = -1;
+	for (int i = 0; i <= M + 1; i++) island[0][i] = island[N + 1][i] = -1;
+	scanf("%d", &Q);
+	for (int i = 1; i <= Q; i++) {
+		scanf("%d", &tmp);
+		if (!chk_dup[tmp]) {
+			chk_dup[tmp] = true;
+			input_num[i] = tmp; // 중복제거
+			for (NODE cur : q[tmp]) {
+				island[cur.y][cur.x] = -1; // 파괴
+			}
+		}
+		else input_num[i] = 0;
+	}
+}
+
+int find(int v) {
+	if (see[v] == v) return v;
+	return see[v] = find(see[v]);
+}
+
+void _union(int v1, int v2) {
+	v1 = find(v1);
+	v2 = find(v2);
+	see[v1] = v2;
+}
+
+void bfs(int y, int x) {
+	queue<NODE> que;
+	int ny, nx;
+	que.push({ y, x });		visited[y][x] = ++numbering;
+	while (!que.empty()) {
+		NODE out = que.front();			que.pop();
+		for (int d = 0; d < 4; d++) {
+			ny = out.y + dy[d];
+			nx = out.x + dx[d];
+			// 파괴됐거나 방문되지 않은 곳(파괴ed)이라면
+			// (island는 번호를 담기 위함이고, visited는 섬의 numbering을 담당)
+			// 따라서 visited의 번호를 가지고 union, find를 해주는 것!!
+			if (island[ny][nx] == -1 || visited[ny][nx] != -1) continue;
+			que.push({ny, nx});
+			visited[ny][nx] = numbering;
+		}
+	}
+}
+
+void output(int t) {
+	printf("#%d", t);
+	for (int i = 1; i <= Q; i++) {
+		/*if (input_num[i] == 0) printf(" %d", cnt_island[i - 1]);
+		else printf(" %d", cnt_island[i]);*/
+		printf(" %d", cnt_island[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	//freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		// 초기화
+		init();
+		// 입력
+		input();
+		/*for (int i = 1; i <= N; i++) {
+			for (int j = 1; j <= M; j++) {
+				printf("%d ", island[i][j]);
+			}
+			printf("\n");
+		}*/
+		// 섬 넘버링 : 현재 다 파괴한 상태이므로, 남아있는 -1이 아닌 양수들의 군집을 섬으로 간주하고, Union 해주어야 함!
+		for (int i = 1; i <= N; i++) {
+			for (int j = 1; j <= M; j++) {
+				if (island[i][j] == -1 || visited[i][j] != -1) continue;
+				bfs(i, j);
+			}
+		}
+		cnt_island[Q] = numbering;
+		// num_cnt ~ 1까지 섬을 복원해주면서, 복원된 땅의 사방에 있는 섬과 Union -> 거꾸로 섬의 개수 저장해줌(cnt_island[i])
+		// input_num[i] == 0이면 continue로 넘어가줌
+		int ny, nx, num = 0;
+		for (int i = Q; i > 1; i--) {
+			num = input_num[i];
+			if (num == 0) {
+				cnt_island[i-1] = cnt_island[i];
+				continue;
+			}
+			else {
+				bool tmp = false;
+				for (NODE cur : q[num]) {
+					island[cur.y][cur.x] = num;
+					for (int d = 0; d < 4; d++) {
+						ny = cur.y + dy[d];
+						nx = cur.x + dx[d];
+						if (island[ny][nx] == -1 || visited[ny][nx] == -1) continue;
+						tmp = true;
+						// 복원된 노드를 중심으로 상하좌우를 보되
+						// 같은 섬인지(대표자 노드가 같은지), 다른 섬인지(대표자 노드가 다른지)를 확인 후
+						// 같으면 섬 수 그대로, 다르면 섬 수 -1
+						if (visited[cur.y][cur.x] == -1) {
+							visited[cur.y][cur.x] = visited[ny][nx];
+						}
+						else {
+							if (find(visited[cur.y][cur.x]) != find(visited[ny][nx])) {
+								_union(visited[ny][nx], visited[cur.y][cur.x]);
+								numbering--;
+							}
+						}
+					}
+					if (!tmp) numbering++;
+				}
+				cnt_island[i-1] = numbering;
+				//printf("numbering : %d\n", numbering);
+			}
+		}
+		// 출력
+		output(tc);
+	}
+	return 0;
+}
+
+
+
+
+// 4차 시도
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMMAX   (500)
+#define QMAX    (100000)
+#define GET_NUM(a, b)   ( (a-1)*M + b )
+
+struct NODE { int y, x; };
+int T, N, M, Q, island_cnt;
+int map[NMMAX + 5][NMMAX + 5], visited[NMMAX+5][NMMAX+5];
+int parent[NMMAX * NMMAX + 5];
+vector<NODE> save_node[QMAX+5];
+int query[QMAX + 5];
+bool chk_query[QMAX + 5];
+int result_cnt[QMAX + 5];
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 };
+
+void init() { // 초기화
+    island_cnt = 0;
+    for (int i = 0; i <= QMAX; i++) {
+        save_node[i].clear();
+        query[i] = result_cnt[i] = 0;
+        chk_query[i] = false;
+    }
+}
+
+void input() {
+    int tmp;
+    scanf("%d %d", &N, &M);
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            scanf("%d", &tmp);
+            map[i][j] = tmp;
+            visited[i][j] = -1;
+            save_node[tmp].push_back({ i, j });
+            parent[GET_NUM(i, j)] = GET_NUM(i, j); // union find 초기화
+            //printf("[%d, %d] => %d\n", i, j, GET_NUM(i, j));
+        }
+    }
+    // 테두리 그어주기(못 빠져나가도록)
+    for (int i = 0; i <= N + 1; i++) map[i][0] = map[i][M + 1] = -1;
+    for (int j = 0; j <= M + 1; j++) map[0][j] = map[N + 1][j] = -1;
+    scanf("%d", &Q);
+    for (int i = 1; i <= Q; i++) {
+        scanf("%d", &tmp);
+        if (!chk_query[tmp]) {
+            chk_query[tmp] = true;
+            query[i] = tmp;
+            for (NODE node : save_node[tmp]) { // 파괴
+                map[node.y][node.x] = -1;
+            }
+        }
+        else query[i] = 0;
+    }
+}
+
+int find(int v) {
+    if (parent[v] == v) return v;
+    return parent[v] = find(parent[v]);
+}
+
+void _union(int v1, int v2) {
+    v1 = find(v1);
+    v2 = find(v2);
+    parent[v1] = v2;
+}
+
+bool chk_parent(int v1, int v2) {
+    return find(v1) != find(v2);
+}
+
+void bfs(int y, int x) {
+    queue<NODE> que;
+    int ny, nx;
+    que.push({ y, x });     visited[y][x] = ++island_cnt;
+    while (!que.empty()) {
+        NODE node = que.front();        que.pop();
+        for (int d = 0; d < 4; d++) {
+            ny = node.y + dy[d];
+            nx = node.x + dx[d];
+            if (map[ny][nx] == -1 || visited[ny][nx] != -1) continue;
+            visited[ny][nx] = island_cnt;
+            que.push({ ny, nx });
+            _union(GET_NUM(ny, nx), GET_NUM(node.y, node.x));
+        }
+    }
+}
+
+void print_map() {
+    printf("print_map\n");
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            printf("%3d", map[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void operation() {
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            if (map[i][j] == -1 || visited[i][j] != -1) continue;
+            bfs(i, j);
+        }
+    }
+    result_cnt[Q] = island_cnt;
+    //print_map();
+}
+
+void get_island_cnt() {
+    int tmp, ny, nx;
+    for (int i = Q; i > 1; i--) { // 첫 번째 query로 파괴된 상태까지만 구하면 된다!
+        tmp = query[i];
+        if (!tmp) {
+            result_cnt[i-1] = result_cnt[i];
+        }
+        else {
+            //bool flag;
+            for (NODE node : save_node[tmp]) {
+                map[node.y][node.x] = tmp;
+                island_cnt++;
+                //flag = true;
+                for (int d = 0; d < 4; d++) {
+                    ny = node.y + dy[d];
+                    nx = node.x + dx[d];
+                    if (map[ny][nx] == -1) continue;
+                    //flag = false;
+                    if (chk_parent(GET_NUM(ny, nx), GET_NUM(node.y, node.x))) {
+                        _union(GET_NUM(ny, nx), GET_NUM(node.y, node.x));
+                        island_cnt--;
+                    }
+                }
+                //if (flag) island_cnt++;
+            }
+            result_cnt[i-1] = island_cnt;
+        }
+        //print_map();
+    }
+}
+
+void output(int tc) {
+    printf("#%d", tc);
+    /*printf("\n");
+    for (int i = 1; i <= Q; i++) printf(" %d", query[i]);
+    printf("\n");*/
+    for (int i = 1; i <= Q; i++) {
+        if(!query[i]) result_cnt[i] = result_cnt[i-1];
+        printf(" %d", result_cnt[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        init();
+        input();
+        operation();
+        //print_map();
+        get_island_cnt();
+        output(tc);
+    }
+    return 0;
+}
+#endif

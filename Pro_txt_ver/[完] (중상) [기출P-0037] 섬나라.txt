@@ -1,0 +1,172 @@
+// (중상) [기출P-0037] 섬나라
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMMAX   (500)
+#define QMAX    (100000)
+#define GET_NUM(a, b)   ( (a-1)*M + b )
+
+struct NODE { int y, x; };
+int T, N, M, Q, island_cnt;
+int map[NMMAX + 5][NMMAX + 5];
+bool visited[NMMAX + 5][NMMAX + 5];
+int parent[NMMAX * NMMAX + 5];
+vector<NODE> save_node[QMAX+5];
+int query[QMAX + 5];
+bool chk_query[QMAX + 5];
+int result_cnt[QMAX + 5];
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 };
+
+void init() { // 초기화
+    island_cnt = 0;
+    for (int i = 0; i <= QMAX; i++) {
+        save_node[i].clear();
+        //query[i] = result_cnt[i] = 0; // 굳이 해줄 필요는 없을 듯
+        chk_query[i] = false;
+    }
+}
+
+void input() {
+    int tmp;
+    scanf("%d %d", &N, &M);
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            scanf("%d", &tmp);
+            map[i][j] = tmp;
+            visited[i][j] = false;
+            save_node[tmp].push_back({ i, j });
+            parent[GET_NUM(i, j)] = GET_NUM(i, j); // union find 초기화
+            //printf("[%d, %d] => %d\n", i, j, GET_NUM(i, j));
+        }
+        map[i][0] = map[i][M + 1] = -1; // 테두리1
+    }
+    // 테두리2 => 그어주기(못 빠져나가도록)
+    for (int j = 0; j <= M + 1; j++) map[0][j] = map[N + 1][j] = -1;
+    scanf("%d", &Q);
+    for (int i = 1; i <= Q; i++) {
+        scanf("%d", &tmp);
+        if (!chk_query[tmp]) {
+            chk_query[tmp] = true;
+            query[i] = tmp;
+            for (NODE node : save_node[tmp]) { // 파괴
+                map[node.y][node.x] = -1;
+            }
+        }
+        else query[i] = 0;
+    }
+}
+
+int find(int v) {
+    if (parent[v] == v) return v;
+    return parent[v] = find(parent[v]);
+}
+
+void _union(int v1, int v2) {
+    v1 = find(v1);
+    v2 = find(v2);
+    parent[v1] = v2;
+}
+
+bool chk_parent(int v1, int v2) {
+    return find(v1) != find(v2);
+}
+
+void bfs(int y, int x) {
+    queue<NODE> que;
+    int ny, nx;
+    que.push({ y, x });     visited[y][x] = true;
+    while (!que.empty()) {
+        NODE node = que.front();        que.pop();
+        for (int d = 0; d < 4; d++) {
+            ny = node.y + dy[d];
+            nx = node.x + dx[d];
+            if (map[ny][nx] == -1 || visited[ny][nx]) continue;
+            visited[ny][nx] = true;
+            que.push({ ny, nx });
+            _union(GET_NUM(ny, nx), GET_NUM(node.y, node.x));
+        }
+    }
+}
+
+void print_map() {
+    printf("print_map\n");
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            printf("%3d", map[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void operation() {
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            if (map[i][j] == -1 || visited[i][j]) continue;
+            bfs(i, j);          island_cnt++;
+        }
+    }
+    result_cnt[Q] = island_cnt;
+    //print_map();
+}
+
+void get_island_cnt() {
+    int tmp, ny, nx;
+    for (int i = Q; i > 1; i--) { // 첫 번째 query로 파괴된 상태까지만 구하면 된다!
+        tmp = query[i];
+        if (!tmp) {
+            result_cnt[i-1] = result_cnt[i];
+        }
+        else {
+            //bool flag;
+            for (NODE node : save_node[tmp]) {
+                map[node.y][node.x] = tmp;
+                island_cnt++;
+                //flag = true;
+                for (int d = 0; d < 4; d++) {
+                    ny = node.y + dy[d];
+                    nx = node.x + dx[d];
+                    if (map[ny][nx] == -1) continue;
+                    //flag = false;
+                    if (chk_parent(GET_NUM(ny, nx), GET_NUM(node.y, node.x))) {
+                        _union(GET_NUM(ny, nx), GET_NUM(node.y, node.x));
+                        island_cnt--;
+                    }
+                }
+                //if (flag) island_cnt++;
+            }
+            result_cnt[i-1] = island_cnt;
+        }
+        //print_map();
+    }
+}
+
+void output(int tc) {
+    printf("#%d", tc);
+    /*printf("\n");
+    for (int i = 1; i <= Q; i++) printf(" %d", query[i]);
+    printf("\n");*/
+    for (int i = 1; i <= Q; i++) {
+        if(!query[i]) result_cnt[i] = result_cnt[i-1];
+        printf(" %d", result_cnt[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        init();
+        input();
+        operation();
+        //print_map();
+        get_island_cnt();
+        output(tc);
+    }
+    return 0;
+}
+#endif
