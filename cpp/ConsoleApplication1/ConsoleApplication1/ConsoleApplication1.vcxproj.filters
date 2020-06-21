@@ -18,6 +18,9 @@
     <ClCompile Include="ConsoleApplication1.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="(중상) [연습P-0022] LIS 2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt">
