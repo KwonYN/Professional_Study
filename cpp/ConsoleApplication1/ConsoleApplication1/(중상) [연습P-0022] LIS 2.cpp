@@ -25,7 +25,7 @@
 	3) N의 방법? : 스택...? 
 		- 
 */
-#if 01
+#if 0
 #pragma warning(disable: 4996)
 #include <cstdio>
 #include <algorithm>

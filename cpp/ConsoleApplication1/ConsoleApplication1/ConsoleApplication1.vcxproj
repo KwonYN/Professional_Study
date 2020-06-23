@@ -147,8 +147,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="(중상) [기출P-0046] 직사각형 체인.cpp" />
     <ClCompile Include="(중상) [연습P-0022] LIS 2.cpp" />
     <ClCompile Include="ConsoleApplication1.cpp" />
+    <ClCompile Include="[기출P-0007] 팀 구성.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt" />
