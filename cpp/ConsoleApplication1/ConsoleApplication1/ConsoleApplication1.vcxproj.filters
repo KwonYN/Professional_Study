@@ -27,6 +27,9 @@
     <ClCompile Include="(중상) [기출P-0046] 직사각형 체인.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="(중) [사전A-0033] [2019년 12월 PRO 검정 사전 테스트] 스마트 팩토리.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt">
