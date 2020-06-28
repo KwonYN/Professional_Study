@@ -1,0 +1,178 @@
+import java.io.*;
+import java.util.*;
+ 
+public class Solution {
+    static int T, N, M, Q, sx, sy, ex, ey, x1, x2, y1, y2, val, xsize, ysize, a, b, c, d, e;
+    static ArrayList<loc> lc;
+    static ArrayList<Integer> tmplc;
+    static ArrayList<Integer> xloc;
+    static ArrayList<Integer> yloc;
+    static ArrayList<Integer> xval;
+    static ArrayList<Integer> yval;
+    static int[][] inloc;
+    static int[] dx = { -1, 0, 1, 0 };
+    static int[] dy = { 0, -1, 0, 1 };
+    static int[][] nwlocx;
+    static int[][] nwlocy;
+    static int[][] dist;
+ 
+    static class loc implements Comparable<loc> {
+        int x, y, v;
+ 
+        public loc(int x, int y, int v) {
+            this.x = x;
+            this.y = y;
+            this.v = v;
+        }
+ 
+        public int compareTo(loc o1) {
+            if (v < o1.v)
+                return -1;
+            else
+                return 1;
+        }
+    }
+ 
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        T = Integer.parseInt(br.readLine());
+        for (int tt = 1; tt <= T; tt++) {
+            N = Integer.parseInt(br.readLine()); // 노드 갯수
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            xloc = new ArrayList<Integer>();
+            yloc = new ArrayList<Integer>();
+            sx = Integer.parseInt(st.nextToken());
+            sy = Integer.parseInt(st.nextToken());
+            ex = Integer.parseInt(st.nextToken());
+            ey = Integer.parseInt(st.nextToken());
+            xloc.add(sx);
+            yloc.add(sy);
+            if (!xloc.contains(ex))
+                xloc.add(ex);
+            if (!yloc.contains(ey))
+                yloc.add(ey);
+ 
+            lc = new ArrayList<loc>();
+            xval = new ArrayList<Integer>();
+            yval = new ArrayList<Integer>();
+            inloc = new int[N + 1][6];
+            for (int i = 1; i <= N; i++) {
+                st = new StringTokenizer(br.readLine());
+                x1 = Integer.parseInt(st.nextToken());
+                y1 = Integer.parseInt(st.nextToken());
+                x2 = Integer.parseInt(st.nextToken());
+                y2 = Integer.parseInt(st.nextToken());
+                val = Integer.parseInt(st.nextToken());
+                if (x1 == x2) { // 세로줄
+                    if (!yloc.contains(y1))
+                        yloc.add(y1);
+                    if (!yloc.contains(y2))
+                        yloc.add(y2);
+                    if (!xloc.contains(x1))
+                        xloc.add(x1);
+                }
+                if (y1 == y2) {// 가로줄
+                    if (!xloc.contains(x1))
+                        xloc.add(x1);
+                    if (!xloc.contains(x2))
+                        xloc.add(x2);
+                    if (!yloc.contains(y1))
+                        yloc.add(y1);
+                }
+                inloc[i][1] = x1;
+                inloc[i][2] = y1;
+                inloc[i][3] = x2;
+                inloc[i][4] = y2;
+                inloc[i][5] = val;
+            }
+            Collections.sort(xloc);
+            Collections.sort(yloc);
+ 
+            xsize = xloc.size();
+            ysize = yloc.size();
+            sx = xloc.indexOf(sx) + 1; // index 번호로 변경함
+            sy = yloc.indexOf(sy) + 1;
+            ex = xloc.indexOf(ex) + 1;
+            ey = yloc.indexOf(ey) + 1;
+            nwlocx = new int[xsize + 1][ysize + 1];
+            nwlocy = new int[xsize + 1][ysize + 1];
+            dist = new int[xsize + 1][ysize + 1];
+            for (int i = 1; i <= xsize; i++) {
+                Arrays.fill(dist[i], Integer.MAX_VALUE);
+            }
+            for (int i = 1; i <= N; i++) {
+                a = xloc.indexOf(inloc[i][1]) + 1;
+                b = yloc.indexOf(inloc[i][2]) + 1;
+                c = xloc.indexOf(inloc[i][3]) + 1;
+                d = yloc.indexOf(inloc[i][4]) + 1;
+                e = inloc[i][5];
+ 
+                if (a == c) { // x가 같다. 세로 계산
+                    if (b > d) {
+                        int tmp = b;
+                        b = d;
+                        d = tmp;
+                    } // 작은순으로 ..
+                    for (int j = b; j < d; j++) {
+                        nwlocy[a][j] += e;
+                    }
+                }
+                if (b == d) { // y가 같다. 가로 계산
+                    if (a > c) {
+                        int tmp = a;
+                        a = c;
+                        c = tmp;
+                    } // 작은순으로 ..
+                    for (int j = a; j < c; j++) {
+                        nwlocx[j][b] += e;
+                    }
+                }
+ 
+            }
+            if (sx==xsize) sx -= 1;
+            if (sy==ysize) sy -= 1;
+            if (ex==xsize) ex -= 1;
+            if (ey==ysize) ey -= 1;
+             
+            dijk(sx, sy);
+            System.out.println("#" + tt + " " + dist[ex][ey]);
+        }
+    }
+ 
+    static void dijk(int sx, int sy) {
+        PriorityQueue<loc> pq = new PriorityQueue<loc>();
+        
+        dist[sx][sy] = 0;
+        pq.add(new loc(sx, sy, 0));
+        while (!pq.isEmpty()) {
+            loc lc = pq.poll();
+            if (dist[lc.x][lc.y] < lc.v)
+                continue; // 방문했다.
+            if ((lc.x == ex) && (lc.y == ey))
+                break; // 도착접이면 나간다.
+            for (int i = 0; i < 4; i++) { // 0 왼쪽, 1 아래, 2 오른쪽, 3 위
+                int chkx, chky, val;
+                val = 0; 
+                chkx = lc.x + dx[i];
+                chky = lc.y + dy[i];
+                if (chkx < 1 || chkx > xsize-1  || chky < 1 || chky > ysize-1)
+                    continue;
+            if (i == 0 ) 
+                    val = nwlocy[lc.x][lc.y] ;
+            else if (i==1)
+                val = nwlocx[lc.x][lc.y] ;
+            else if(i==2)
+                val = nwlocy[chkx][chky];
+            else if(i==3)
+                val = nwlocx[chkx][chky];
+   //             if (val == 0) continue; 
+                if (dist[chkx][chky] > dist[lc.x][lc.y] + val) {
+                    dist[chkx][chky] = dist[lc.x][lc.y] + val;
+                    pq.add(new loc(chkx, chky, dist[chkx][chky]));
+                }
+ 
+            }
+        }
+ 
+    }
+}

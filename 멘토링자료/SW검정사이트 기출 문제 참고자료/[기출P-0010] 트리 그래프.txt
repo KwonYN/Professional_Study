@@ -1,0 +1,227 @@
+import java.io.BufferedReader;
+//import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.StringTokenizer;
+  
+  
+public class Solution {
+  
+    static StringTokenizer strTkn;
+    static int N, M, L;
+      
+    static ArrayList<Integer>[] LK1, LK2;
+  
+    static long[][] dp1, dp2;
+    static int[] par1, par2;
+    static int answer;
+     
+    static int[][] stack;
+    static int top;
+    static HashSet<Long> set;
+     
+    public static void main(String[] args) throws IOException {
+        //long startTime = System.currentTimeMillis();
+        //System.setIn(new FileInputStream("input_sample.txt"));
+          
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+          
+        int T = Integer.parseInt(br.readLine());
+        for (int testCase = 1; testCase <= T; testCase++) {
+            //[제한조건]
+            //      1. 원본 트리의 노드 개수 N 은 2 이상 100000(십만) 이하의 자연수이다.
+            //      2. 복사본인지 확인해야 하는 트리의 노드 개수 M 은 2 이상 N 이하의 자연수이다.
+            //      3. 리프 노드의 개수 L 은 2 이상 M 미만의 자연수이다.
+            //      4. 주어지는 원본 트리의 간선의 개수는 N-1 개이다.
+            //      5. 주어지는 복사본 트리의 간선의 개수는 M-1 개이다.
+            //      6. 압축 과정은 이미 축약된 노드와의 축약도 가능하다.
+              
+            //각 케이스의 첫째 줄에 원본 트리의 노드 개수 N, 복사본인지 확인해야 하는 트리의 노드 개수 M,
+            //그리고 두 트리의 리프 노드 개수 L이 주어진다. (2 ≤ L < M ≤ N ≤ 100,000)
+            //두 트리에서 노드 1번부터 L번 까지가 리프 노드이며, 같은 번호의 리프 노드끼리 매칭
+            strTkn = new StringTokenizer(br.readLine());
+            N = Integer.parseInt(strTkn.nextToken());
+            M = Integer.parseInt(strTkn.nextToken());
+            L = Integer.parseInt(strTkn.nextToken());
+            //if (testCase == 9) System.out.println("N=" + N + ", M=" + M + ", L=" + L);
+  
+            /*
+원본 트리와 복제본 트리의 리프 노드 중(1~L번) 하나를 root로 간주하고 tree를 구성합니다. 
+원본 트리와 복제본 트리 모두 각 노드들이 포함하고 있는(자식으로 가지고 있는) 리프노드들의 정보를 알고 있으면 
+이를 비교하여 복제본 트리가 원본트리를 압축해서 만든 트리인지를 판단할 수 있습니다. 
+임의의 노드가 포함하고 있는 리프노드의 개수가 P개라고 한다면, 
+P개의 정보를 모두 가지고 있을 필요 없이 리프노드들 중 가장 값이 작은 것과 큰 것, 두개의 정보만 가지고 있으면 가능하므로 
+가장 값이 작은노드*L + 가장 값이 큰 노드 같이 임의의 key값으로 저장하면 됩니다. 
+             */
+            LK1 = new ArrayList[N+1];
+            LK2 = new ArrayList[M+1];
+  
+            dp1 = new long[2][N+1];
+            dp2 = new long[2][M+1];
+            Arrays.fill(dp1[0], 1, 1+N, Integer.MAX_VALUE);
+            Arrays.fill(dp2[0], 1, 1+M, Integer.MAX_VALUE);
+            Arrays.fill(dp1[1], 1, 1+N, Integer.MIN_VALUE);
+            Arrays.fill(dp2[1], 1, 1+M, Integer.MIN_VALUE);
+            set = new HashSet<Long>();
+             
+            for (int i = 1; i <= N; i++) {
+                LK1[i] = new ArrayList<Integer>();
+                if (i <= M) LK2[i] = new ArrayList<Integer>();
+            }
+  
+            int a, b;
+            for (int i = 0; i < N-1; i++) {
+                strTkn = new StringTokenizer(br.readLine());
+                a = Integer.parseInt(strTkn.nextToken());
+                b = Integer.parseInt(strTkn.nextToken());
+                LK1[a].add(b);
+                LK1[b].add(a);
+            }
+            for (int i = 0; i < M-1; i++) {
+                strTkn = new StringTokenizer(br.readLine());
+                a = Integer.parseInt(strTkn.nextToken());
+                b = Integer.parseInt(strTkn.nextToken());
+                LK2[a].add(b);
+                LK2[b].add(a);
+            }
+ 
+            answer = 1;
+              
+            par1 = new int[N+1];
+            par2 = new int[N+1];
+            dfs1(1);
+            for (int i = L + 1; i <= N; i++) {
+                set.add((long) dp1[0][i] * L + dp1[1][i]);
+                //if (testCase == 9) System.out.println("i=" + i + ", dp1[0][i]=" + dp1[0][i] + ", dp1[1][i]=" + dp1[1][i]);
+            }
+            //if (testCase == 9) System.out.println(set.toString());
+            dfs2(1);
+            //System.out.print("par1=["); for (int i = 1; i <= N; i++) System.out.print(" " + par1[i]); System.out.println(" ]");
+            //System.out.print("par2=["); for (int i = 1; i <= N; i++) System.out.print(" " + par2[i]); System.out.println(" ]");
+            //System.out.print("dp1=["); for (int j = 1; j <= N; j++) System.out.print("(" + dp1[0][j] + "," + dp1[1][j] + ")"); System.out.println(" ]");
+            //System.out.print("dp2=["); for (int j = 1; j <= M; j++) System.out.print("(" + dp2[0][j] + "," + dp2[1][j] + ")"); System.out.println(" ]");
+ 
+            for (int i = L+1; i <= M; i++) {
+                if (!set.contains((long) dp2[0][i] * L + dp2[1][i])) {
+                    answer = 0;
+                    break;
+                }
+            }
+            //if (testCase == 9) {
+            //  for (int i = 1; i <= M; i++) System.out.println("i=" + i + ", dp2[0][i]=" + dp2[0][i] + ", dp2[1][i]=" + dp2[1][i]);
+            //}
+ 
+            // 입력으로 주어진 두 트리가 문제에서 정한 과정으로 만들어진 것으로 판단되면 1을,
+            // 문제에서 정한 과정으로 만들어지는 것이 절대 불가능한 것이면 0을 출력한다.
+            System.out.println("#" + testCase + " " + answer);
+        }
+          
+        //System.out.println(String.format("Time : %d", System.currentTimeMillis() - startTime));
+        br.close();
+    }
+     
+    // 원본 트리
+    private static void dfs1(int n) {
+        stack = new int[N+1][2];
+        top = 0;
+        stack[top][0] = n;
+        stack[top][1] = 0;
+        par1[n] = 0;
+        //System.out.println("cur=" + n);
+         
+        int cnt = 1;
+        while (top >= 0) {
+            //System.out.print("Stack=[ "); for (int i = 0; i <= top1; i++) System.out.print("(" + stack1[i][0] + "," + stack1[i][1] + ")"); System.out.println(" ]");
+                 
+            int par = stack[top][0];
+            int idx = stack[top][1];
+            //System.out.println("top1=" + top1 + ", par=" + par + ", idx=" + idx + ", LK1[par].size()=" + LK1[par].size());
+            int next = -1;
+            for (int i = idx; i < LK1[par].size(); i++) {
+                //System.out.println("par=" + par + ", i=" + i + ", idx=" + idx + ", LK1[par].get(i)=" + LK1[par].get(i) + ", par1[par]=" + par1[par] + ", stack1[top1][1]=" + stack1[top1][1]);
+                if (par1[LK1[par].get(i)] == 0 && LK1[par].get(i) != par1[par]) {
+                    next = i;
+                    break;
+                }
+            }
+            //System.out.println("next=" + next);
+            if (next == -1) {
+                //System.out.println("Return=" + stack1[top1][0]);
+                int node = stack[top][0];
+                if (node <= L && node != n) {
+                    dp1[0][node] = cnt;
+                    dp1[1][node] = cnt;
+                    if (dp1[0][par1[node]] > cnt) dp1[0][par1[node]] = cnt;
+                    if (dp1[1][par1[node]] < cnt) dp1[1][par1[node]] = cnt;
+                    cnt++;
+                }
+                else {
+                    if (dp1[0][par1[node]] > dp1[0][node]) dp1[0][par1[node]] = dp1[0][node];
+                    if (dp1[1][par1[node]] < dp1[1][node]) dp1[1][par1[node]] = dp1[1][node];
+                }
+                 
+                //System.out.println("par=" + par1[node] + ", cur=" + node + ", dp1[0][par1[node]]=" + dp1[0][par1[node]] + ", dp1[1][par1[node]]=" + dp1[1][par1[node]]);
+                top--;
+            }
+            else {
+                par1[LK1[par].get(next)] = par;
+                stack[top][1] = next + 1;
+                stack[++top][0] = LK1[par].get(next);
+                stack[top][1] = 0;
+            }
+        }
+    }
+   
+    // 복사 트리
+    private static void dfs2(int n) {
+        stack = new int[M+1][2];
+        top = 0;
+        stack[top][0] = n;
+        stack[top][1] = 0;
+        par2[n] = 0;
+        //System.out.println("cur=" + n);
+           
+        while (top >= 0) {
+            //System.out.print("Stack=[ "); for (int i = 0; i <= top2; i++) System.out.print("(" + stack2[i][0] + "," + stack2[i][1] + ")"); System.out.println(" ]");
+                 
+            int par = stack[top][0];
+            int idx = stack[top][1];
+            //System.out.println("top2=" + top2 + ", par=" + par + ", idx=" + idx + ", LK2[par].size()=" + LK2[par].size());
+            int next = -1;
+            for (int i = idx; i < LK2[par].size(); i++) {
+                //System.out.println("par=" + par + ", i=" + i + ", idx=" + idx + ", LK2[par].get(i)=" + LK2[par].get(i) + ", par2[par]=" + par2[par] + ", stack2[top2][1]=" + stack2[top2][1]);
+                if (par2[LK2[par].get(i)] == 0 && LK2[par].get(i) != par2[par]) {
+                    next = i;
+                    break;
+                }
+            }
+            //System.out.println("next=" + next);
+            if (next == -1) {
+                //System.out.println("Return=" + stack2[top2][0]);
+                int node = stack[top][0];
+                if (node <= L && node != n) {
+                    dp2[0][node] = dp1[0][node];
+                    dp2[1][node] = dp1[1][node];
+                    if (dp2[0][par2[node]] > dp1[0][node]) dp2[0][par2[node]] = dp1[0][node];
+                    if (dp2[1][par2[node]] < dp1[1][node]) dp2[1][par2[node]] = dp1[1][node];
+                }
+                else {
+                    if (dp2[0][par2[node]] > dp2[0][node]) dp2[0][par2[node]] = dp2[0][node];
+                    if (dp2[1][par2[node]] < dp2[1][node]) dp2[1][par2[node]] = dp2[1][node];
+                }
+                 
+                //System.out.println("par=" + par2[node] + ", cur=" + node + ", dp2[0][par2[node]]=" + dp2[0][par2[node]] + ", dp2[2][par2[node]]=" + dp2[1][par2[node]]);
+                top--;
+            }
+            else {
+                par2[LK2[par].get(next)] = par;
+                stack[top][1] = next + 1;
+                stack[++top][0] = LK2[par].get(next);
+                stack[top][1] = 0;
+            }
+        }
+    }
+}

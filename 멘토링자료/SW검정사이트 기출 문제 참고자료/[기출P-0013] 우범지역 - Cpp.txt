@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <vector>
+#define ll long long
+#define MAXN 100006
+#define MAXM 106
+ 
+using namespace std;
+ 
+int tc,t,n,k,a,b,visited[MAXN],C[MAXN],P[MAXN],now,son,D2[MAXN];
+int D[MAXN][MAXM],depth[MAXN];
+vector <int> v[MAXN];
+__inline int max(int a, int b){
+    return a>b?a:b;
+}
+__inline int min (int a, int b){
+    return a<b?a:b;
+}
+int dfs(int idx){
+    int dpt=0;
+    for (auto it : v[idx]){
+        if(visited[it]==tc) continue;
+        visited[it] = tc;
+        P[it]=idx;
+        dpt=min(k,max(dpt,dfs(it)+1));
+        for(int i=1;i<=k;i++) D[idx][i] += D[it][i-1]+1;
+    }
+    return depth[dpt];
+}
+int main(){
+    scanf("%d",&t);
+    for(tc=1;tc<=t;tc++){
+        scanf("%d%d",&n,&k);
+        for(int i=1;i<=n;i++) v[i].clear();
+        for(int i=1;i<=n;i++) for(int j=0;j<=k;j++) D[i][j]=0;
+            for(int i=1;i<n;i++){
+            scanf("%d%d",&a,&b);
+            v[a].push_back(b);
+            v[b].push_back(a);
+        }
+    for(int i=1;i<=n;i++) scanf("%d",C+i);
+    P[1]=1;
+    visited[1]=tc;
+    dfs(1);
+         for(int i=1;i<=n;i++) for(int j=0;j<=k;j++) D[i][j]++;
+    ll ans=0;
+    for(int i=1;i<=n;i++){
+        if(!C[i]) continue;
+        now=i;
+        son=i;
+        ans+=D[now][k];
+        for(int j=1;j<=k;j++){
+            if(now==P[now]) break;
+            now=P[now];
+            ans+=D[now][k-j];
+            if(k-j-1>=0) ans-=D[son][k-j-1];
+            son=now;
+        }
+    }
+    printf("#%d %lld\n",tc,ans);
+    }
+}

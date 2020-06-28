@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <vector>
+#define MAX 100010
+ 
+int n, m;
+struct data {
+    int to, cost;
+};
+std::vector<data> vec[MAX];
+int dy[MAX], deg[MAX];
+ 
+void dfs(int now) {
+    for (data chd : vec[now]) {
+        deg[chd.to]--;
+        if (dy[chd.to] < dy[now] + chd.cost) dy[chd.to] = dy[now] + chd.cost;
+        if (deg[chd.to] == 0) {
+            dfs(chd.to);
+        }
+    }
+}
+ 
+int main(void) {
+    int test, i, a, b, c;
+    scanf("%d", &test);
+    for (int T = 1; T <= test; T++) {
+        scanf("%d %d", &n, &m);
+        for (i = 1; i <= m; i++) {
+            scanf("%d %d %d", &a, &b, &c);
+            vec[a].push_back({ b, c });
+            deg[b]++;
+        }
+        dfs(1);
+        printf("#%d %d\n", T, dy[n]);
+        for (i = 1; i <= n; i++) {
+            vec[i].clear();
+            dy[i] = 0;
+        }
+    }
+    return false;
+}

@@ -1,0 +1,74 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+ 
+//P-0007 팀구성
+public class Solution {
+     
+    static StringTokenizer st;
+    static BufferedReader br= new BufferedReader(new InputStreamReader(System.in)); 
+    static int T, N;
+    static int[] Score; //입력받은 수열
+    static int[] ScoreSumLeft; //왼쪽에서 연속된 숫자의 최대합
+    static int[] ScoreSumRight; //오른쪽에서 연속된 숫자의 최대합
+    static int[] ScoreSumLeftExcept; //왼쪽에서 연속된 숫자의 최대합(1개를 뺀)
+    static int[] ScoreSumRightExcept; //오른쪽에서 연속된 숫자의 최대합(1개를 뺀)
+     
+    static int answer;
+    static final int MOD =1000000007;
+         
+    public static void main(String[] args) throws IOException {
+          
+        st = new StringTokenizer(br.readLine());
+        T = Integer.parseInt(st.nextToken());
+          
+        for(int test_case =1; test_case <=T; test_case ++) {
+            st= new StringTokenizer(br.readLine());
+            N = Integer.parseInt(st.nextToken());
+             
+            Score = new int[N+1];
+            ScoreSumLeft = new int[N+2]; //N-1 인덱스 오류를 방지하기 위해 +2로 설정
+            ScoreSumRight = new int[N+2];
+            ScoreSumLeftExcept = new int[N+2];
+            ScoreSumRightExcept = new int[N+2];
+             
+            st= new StringTokenizer(br.readLine());
+            for(int i=1; i<=N; i++) {
+                Score[i] = Integer.parseInt(st.nextToken());
+            }
+             
+            for(int i=1; i<=N; i++) {
+                ScoreSumLeft[i] = Math.max(ScoreSumLeft[i-1] + Score[i], Score[i]);
+                ScoreSumLeftExcept[i] = Math.max(ScoreSumLeft[i-1], ScoreSumLeftExcept[i-1] + Score[i]);
+            }
+             
+            for(int i=N; i>=1; i--) {
+                ScoreSumRight[i] = Math.max(ScoreSumRight[i+1] + Score[i], Score[i]);
+                ScoreSumRightExcept[i] = Math.max(ScoreSumRight[i+1], ScoreSumRightExcept[i+1] + Score[i]);
+            }
+             
+            for(int i=1; i<=N; i++) {
+                ScoreSumRight[i] = Math.max(ScoreSumRight[i], 0);
+                ScoreSumRightExcept[i] = Math.max(ScoreSumRightExcept[i],0);                
+                ScoreSumLeft[i] = Math.max(ScoreSumLeft[i], 0);
+                ScoreSumLeftExcept[i] = Math.max(ScoreSumLeftExcept[i],0);
+            }
+             
+            answer = 0;
+            for(int i=1; i<=N; i++) {
+                int nowValue;
+                //case1. 왼쪽에서 빼거나 오른쪽에서 빼거나
+                nowValue = Math.max(ScoreSumRight[i+1]+ScoreSumLeftExcept[i-1],ScoreSumLeft[i-1] + ScoreSumRightExcept[i+1]);
+                //case2. 한명도 제외하지 않는 경우가 가장 좋을때도 있다.
+                nowValue = Math.max(nowValue, ScoreSumRight[i+1]+ScoreSumLeft[i-1]);
+                answer = (answer + Math.abs(nowValue + Score[i])) % MOD;
+                 
+            }
+             
+            System.out.println("#" + test_case + " " + answer);
+        }
+         
+    }
+     
+}

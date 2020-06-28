@@ -1,0 +1,67 @@
+#include <iostream>
+#include<queue>
+ 
+#define MAX_N 501
+#define INF 500*500*1000
+using namespace std; 
+ 
+int n, m;
+ 
+int map[MAX_N][MAX_N];
+int dx[4] = { 0, 0, 1, -1 };
+int dy[4] = { 1, -1, 0, 0 };
+ 
+int dist[MAX_N][MAX_N];
+ 
+void clear() {
+    for (int i = 0; i < MAX_N; i++) {
+        for (int j = 0; j < MAX_N; j++) {
+            map[i][j] = 0;
+            dist[i][j] = INF;
+        }
+    }
+}
+ 
+struct Edge {
+    int x, y;
+    int cost;
+    bool operator<(const Edge& e) const {
+        return cost > e.cost;
+    }
+};
+ 
+void dijkstra() {
+    priority_queue<Edge> pq;
+    dist[1][1] = map[1][1];
+    pq.push({ 1, 1, map[1][1] });
+    while (!pq.empty()) {
+        Edge curr = pq.top(); pq.pop();
+        if (curr.cost > dist[curr.x][curr.y]) continue;
+ 
+        for (int i = 0; i < 4; i++) {
+            int next_x = curr.x + dx[i];
+            int next_y = curr.y + dy[i];
+            if (next_x > 0 && next_x <= n && next_y > 0 && next_y <= m) {
+                if (dist[next_x][next_y] > curr.cost + map[next_x][next_y]) {
+                    dist[next_x][next_y] = curr.cost + map[next_x][next_y];
+                    pq.push({ next_x, next_y, curr.cost + map[next_x][next_y] });
+                }
+            }
+        }
+    }
+}
+int main() {
+    int T;
+    scanf("%d", &T);
+    for (int t = 1; t <= T; t++) {
+        clear();
+        scanf("%d %d", &n, &m);
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                scanf("%d", &map[i][j]);
+            }
+        }
+        dijkstra();
+        printf("#%d %d\n", t, dist[n][m]);
+    }
+}

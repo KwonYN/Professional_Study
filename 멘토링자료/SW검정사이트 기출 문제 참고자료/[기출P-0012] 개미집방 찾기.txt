@@ -1,0 +1,114 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Stack;
+import java.util.StringTokenizer;
+  
+class Solution{
+      
+    static StringTokenizer st;
+    static int T;
+    static int N;
+    static int[] Pm;  //Parent를 담을 배열
+    static int[][] Cm;//Child를 담을 배열
+    static boolean[] Ck; //탐색
+    static int[] Hm;  //본인의 root로부터의 깊이를 담을 배열
+    static int[] Tm; //temp 배열
+    static int [][] Ar;
+    static int A, B, C, S, tempK, tempS;
+    static long Answer;
+      
+    public static void main(String[] args) throws Exception {
+          
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        T = Integer.parseInt(br.readLine());
+        for(int test_case=1; test_case<=T; test_case++) {
+              
+            N = Integer.parseInt(br.readLine());
+            Pm = new int[N+1];
+            Hm = new int[N+1];
+            Cm = new int[N+1][2];
+            Ck  = new boolean[N+1];
+            Tm = new int[N+1];
+            Ar = new int[N+1][11];
+            Answer = 0;
+  
+              
+            //-----------변수를 받아서 배열들에 담고 ----------------
+            for(int i=1; i<=N; i++) {
+                st = new StringTokenizer(br.readLine());
+                A = Integer.parseInt(st.nextToken()); //여기서 i는 방, A는 페어런트 
+                B = Integer.parseInt(st.nextToken()); //0이면 Parent의 left, 1이면 right
+                C = Integer.parseInt(st.nextToken()); //개미가 말한 방의 수
+                  
+                Pm[i] = A; //Parent를 담는 배열
+                if(A==0) {
+                    Pm[0] = i; //여기서는 root
+                }
+                if(B==0) {
+                    Cm[A][0] = i;  //Left child 
+                }
+                else if(B==1){
+                    Cm[A][1] = i;  //Right Child    
+                }   
+                  
+                Ar[i][0]= C;
+                  
+                for(int j=1; j<=C; j++) { 
+                    Ar[i][j]= Integer.parseInt(st.nextToken());  //개미들이 말한 방을 ArrayList에 담고
+                }
+            }
+              
+            dfs(Pm[0]); //방과 루트까지의 거리를 메모이제이션으로 구하자 
+            tempS = 1;
+            Sol(Pm[0]);
+  
+        System.out.println("#"+test_case+" "+Answer);
+        }
+          
+    }
+  
+    private static void Sol(int f) {
+  
+        if(Ck[f]==true) {
+            return;
+        }
+        Tm[Hm[f]]=f;
+        Ck[f] = true; //해당방은 탐색했다는 의미
+        tempK = 0;
+        for(int k=1; k <= Ar[f][0]; k++){
+            if(Hm[Ar[f][k]]<=Hm[f]) {
+  
+                    if(Tm[Hm[Ar[f][k]]]==Ar[f][k]) {
+                        if(tempK==0) {
+                            tempK = Ar[f][k];
+                    }
+                    else if(Hm[Ar[f][k]]<Hm[tempK]) {
+                                tempK = Ar[f][k];
+                    }   
+                }
+            }
+        }
+          
+        Answer += 2*(Hm[f]-Hm[tempK]); 
+          
+        if(Cm[f][0]>0){
+            Sol(Cm[f][0]);  
+        }
+        if(Cm[f][1]>0){
+            Sol(Cm[f][1]);  
+        }
+    }
+  
+    private static void dfs(int i) {
+        if(Cm[i][0]!=0) {
+            Hm[Cm[i][0]] = Hm[i]+1; 
+            dfs(Cm[i][0]); 
+        }
+        if(Cm[i][1]!=0) {
+            Hm[Cm[i][1]] = Hm[i]+1; 
+            dfs(Cm[i][1]);
+        } 
+    }
+}

@@ -1,0 +1,58 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+     
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+         
+        long max =1;
+        for(int i=1; i<=60; i++) {
+            max *=2;
+        }
+        //콤비네이션 nCk
+        long[][] dp = new long[1001][1001];
+        for(int i=0; i<=1000; i++) {
+            dp[i][0] =1;
+            for(int j=1;j<=i;j++) {
+                dp[i][j] = dp[i-1][j] + dp[i-1][j-1];
+                if(dp[i][j]>max) {
+                    dp[i][j]=max+1;
+                }
+            }
+        }
+         
+        int T = Integer.parseInt(br.readLine());
+         
+        for(int t=1 ;t<=T ; t++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int N = Integer.parseInt(st.nextToken()); //길이 (1 ≤ K ≤ N ≤ 1,000)
+            int K = Integer.parseInt(st.nextToken()); //1의 개수
+            long  X= Long.parseLong(st.nextToken()); //오름차순번째 1 ≤ X ≤ 2^60
+             
+            int n = N-K;
+            int count =0;
+             
+            bw.write("#"+ t +" ");
+            while(count<N) {
+                count ++;
+                 
+                if( X<= dp[n+K-1][K]) {
+                    bw.write("0");
+                    n--;
+                }else {
+                    bw.write("1");
+                    X -= dp[n+K-1][K];
+                    K--;
+                }
+            }
+            bw.write("\n");
+        }
+        bw.flush();
+        bw.close();
+    }
+}

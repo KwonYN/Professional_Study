@@ -1,0 +1,138 @@
+import java.io.*;
+import java.util.*;
+ 
+//public class preP_0016 { // 개미핥기
+public class Solution { // 개미핥기
+    static BufferedReader br;
+    static StringTokenizer st;
+     
+    static int T;
+    static int N; // 3 <= N <= 10,000
+     
+    static int WID;
+    static int HEI[] = new int[10001];
+    static int EAT_L[][] = new int[10001][3];
+    static int EAT_R[][] = new int[10001][3];
+     
+    static int DP[][][] = new int[10001][3][3];
+     
+    static long ANS;
+    public static void main(String args[]) throws Exception {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        st = new StringTokenizer(br.readLine());
+        T = Integer.parseInt(st.nextToken());
+         
+        for(int t = 1; t <= T; t++) {
+            st = new StringTokenizer(br.readLine());
+            N = Integer.parseInt(st.nextToken());
+             
+            st = new StringTokenizer(br.readLine());
+            WID = Integer.parseInt(st.nextToken());
+             
+            for(int n = 1; n <= N; n++) {
+                st = new StringTokenizer(br.readLine());
+                EAT_L[n][0] = 0;
+                EAT_L[n][1] = Integer.parseInt(st.nextToken());
+                EAT_L[n][2] = Integer.parseInt(st.nextToken());
+                EAT_R[n][0] = 0;
+                EAT_R[n][1] = Integer.parseInt(st.nextToken());
+                EAT_R[n][2] = Integer.parseInt(st.nextToken());
+            }
+            for(int n = 1; n < N; n++) {
+                st = new StringTokenizer(br.readLine());
+                HEI[n] = Integer.parseInt(st.nextToken());
+            }
+            HEI[N] = 0;
+             
+             
+            // DP[n][l][r] = n번째에 왼쪽의 l 번째 개미핥기와 오른쪽 r 번째 개미핥기가 혀를 내밀었을때의 최대 총 길이
+            for(int n = 1; n <= N; n++) {
+                for(int l = 0; l <= 2; l++) {
+                    for(int r = 0; r <= 2; r++) {
+                        DP[n][l][r] = -1;
+                    }
+                }
+            }
+             
+            ANS = 0;
+             
+            // n번째 에서 아래 방향으로 혀를 내미는 개미핥기를 각각 선정한다.
+            for(int n = 1; n <= N; n++) {
+                for(int l = 0; l <= 2; l++) { // 왼쪽의 l번째 개미핥기
+                    if(EAT_L[n][l] > HEI[n]) {
+                        continue;
+                    }
+                     
+                    for(int r = 0; r <= 2; r++) { // 오른쪽의 r번째 개미핥기
+                        if(EAT_R[n][r] > HEI[n]) {
+                            continue;
+                        }
+                         
+                        DP[n][l][r] = EAT_L[n][l] + EAT_R[n][r] // l번째 개미핥기와 r번째 개미핱기가 아래로 혀를 내밀 때
+                                      + find(n, l, r); // 다른 개미핥기들이 각각 위, 옆 으로 혀를 내미는 방법 중 가장 합이 큰 값을 찾는다.  
+                         
+                    }
+                }
+            }
+             
+            ANS = DP[N][0][0];
+             
+            System.out.print("#");
+            System.out.print(t);
+            System.out.print(" ");
+            System.out.println(ANS);
+             
+        }
+    }
+    private static int find(int n, int l, int r) {
+        // TODO Auto-generated method stub
+        int RTN = 0;
+         
+        for(int prior_l = 0; prior_l <= 2; prior_l++) { // 전 단계에서의 왼쪽 개미핥기와 
+            if(EAT_L[n - 1][prior_l] > HEI[n - 1]) {
+                continue;
+            }
+            for(int prior_r = 0; prior_r <= 2; prior_r++) { // 전 단계에서의 오른쪽 개미핥기를 찾아서 만든 DP 값을 베이스로 (3 * 3 = 9가지 DP케이스)
+                if(EAT_R[n - 1][prior_r] > HEI[n - 1]) {
+                    continue;
+                }
+                 
+                // n번째 l, r 개미핥기를 제외한 나머지를 가지고 위, 옆으로 혀를 내밀 수 있는 최대값을 찾는다.
+                RTN = Math.max(RTN, DP[n - 1][prior_l][prior_r] + get(n, l, r, HEI[n - 1] - EAT_L[n - 1][prior_l], HEI[n - 1] - EAT_R[n - 1][prior_r]));
+            }
+        }
+         
+        return RTN;
+    }
+    private static int get(int n, int l, int r, int hl, int hr) {
+        // TODO Auto-generated method stub
+        int RTN = 0;
+         
+        for(int ver_l = 0; ver_l <= 2; ver_l++) { // n번째에 수직으로 혀를 내밀 왼쪽 개미핥기를 선택
+            if((ver_l != 0 && ver_l == l) || (EAT_L[n][ver_l] > hl)) { // 개미핥기를 고르지 않거나 l번이 아닌개미핥기를 선택 
+                continue;
+            }
+            for(int ver_r = 0; ver_r <= 2; ver_r++) { // n번째에 수직으로 혀를 내밀 오른쪽 개미핥기를 선택
+                if((ver_r != 0 && ver_r == r) || (EAT_R[n][ver_r] > hr)) { // 개미핥기를 고르지 않거나 r번이 아닌개미핥기를 선택
+                    continue;
+                }
+                 
+                for(int hor_l = 0; hor_l <= 2; hor_l++) { // n번째에 수평으로 혀를 내밀 왼쪽 개미핥기를 선택
+                    if((hor_l != 0 && hor_l == l) || (hor_l != 0 && hor_l == ver_l) || (EAT_L[n][hor_l] > WID)) { // 개미핥기를 고르지 않거나 l번, ver_l번이 아닌개미핥기를 선택
+                        continue;
+                    }
+                    for(int hor_r = 0; hor_r <= 2; hor_r++) { // n번째에 수평으로 혀를 내밀 오른쪽 개미핥기를 선택
+                        if((hor_r != 0 && hor_r == r) || (hor_r != 0 && hor_r == ver_r) || (EAT_R[n][hor_r] > WID - EAT_L[n][hor_l])) { // 개미핥기를 고르지 않거나 r번, ver_r번이 아닌개미핥기를 선택
+                            continue;
+                        }
+                        RTN = Math.max(RTN, EAT_L[n][ver_l] + EAT_R[n][ver_r] + EAT_L[n][hor_l] + EAT_R[n][hor_r]);
+                    }
+                }   
+                 
+                 
+            }
+        }
+         
+        return RTN;
+    }
+}

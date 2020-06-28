@@ -1,0 +1,126 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Stack;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+ 
+    static int testcase;
+    static int N;
+    static int K;
+ 
+    static int init[];
+    static int cycle[];
+    static int cycleinfo[];
+    static int cyclenum = 1;
+ 
+    static boolean chk;
+    static int cycleindex;
+ 
+    static int cyclecnt;
+    static long ret;
+ 
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+ 
+        testcase = Integer.parseInt(st.nextToken());
+ 
+        for (int tc = 1; tc <= testcase; tc++) {
+            st = new StringTokenizer(br.readLine());
+ 
+            N = Integer.parseInt(st.nextToken());
+            K = Integer.parseInt(st.nextToken());
+ 
+            init = new int[N + 1];
+            cycle = new int[N + 1];
+            cycleinfo = new int[N + 1];
+            st = new StringTokenizer(br.readLine());
+            for (int i = 1; i <= N; i++) {
+ 
+                int tmp = Integer.parseInt(st.nextToken());
+                init[i] = tmp;
+            }
+ 
+            // cycle 갯수 확인. 템플릿으로 생각
+ 
+            chk = false;
+            cycleindex = 1;
+            for (int i = 1; i <= N; i++) {
+ 
+                if (cycle[i] == 0) {
+ 
+                    chk = find(i, cycleindex);
+ 
+                    if (chk) {
+                        cycleindex++;
+                    }
+                }
+            }
+ 
+             
+            for (int i=1;i<=N;i++) {
+                 
+                ret += cycleinfo[i]>K?K:cycleinfo[i];
+            }
+             
+            System.out.println("#" + tc + " " + ret);
+            ret = 0;
+        }
+    }
+ 
+    private static boolean find(int start, int cycleCount) {
+ 
+        int current = start;
+        Stack<Integer> stack = new Stack<Integer>();
+        boolean findcycle = false;
+ 
+        cyclecnt = 0;
+         
+        // cycle이 나오거나 처음자리 이후로 돌아갈때까지 while문
+        while (true) {
+ 
+            // 이미 방문했으면서 처음 출발보다 클 때
+            if (cycle[current] != 0 && cycle[current] < cycle[start]) {
+                break;
+ 
+            }
+ 
+            // cycle 일 경우 현재 방문 순서에서 해당 노드 방문 순서를 뺌
+            if (cycle[current] != 0) {
+ 
+                cyclecnt = cyclenum - cycle[current];
+                findcycle = true;
+                 
+                break;
+ 
+            }
+ 
+            stack.add(current);
+            cycle[current] = cyclenum++;
+            current = init[current];
+ 
+        }
+ 
+        // 사이클 부터 확인
+        for (int i = 0; i < cyclecnt; i++) {
+ 
+            int c = stack.pop();
+ 
+            // 내가 방문할 수 있는 최대 노두 갯수
+            cycleinfo[c] = cyclecnt - 1;
+        }
+ 
+        // 사이클이 아닌 경우 남은 스택에서 확인
+        while (!stack.isEmpty()) {
+            int c = stack.pop();
+ 
+            // 내가 방문할 예전인 자식 노드에 1을 더해줌. 사이클 가기 직전 최종 방문 노드
+            cycleinfo[c] = cycleinfo[init[c]] + 1;
+ 
+        }
+ 
+        return findcycle;
+    }
+}

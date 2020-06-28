@@ -1,0 +1,121 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+    static int T, L;
+    static long X; 
+    static String partialString;
+    static String stringForI;
+    static String stringForJ;
+    static String stringForK;
+     
+    static StringTokenizer st;
+     
+    static int u = 1;
+    static int i = 2;
+    static int j = 3;
+    static int k = 4;
+    static int currentI, nextI, calculatedI;
+    static int currentJ, nextJ, calculatedJ;
+    static int currentK, nextK, calculatedK;
+     
+     
+    static int [][] hamilton = {  {  0 ,  0 ,  0 ,  0 ,  0 },
+                                  {  0 ,  u ,  i ,  j ,  k },
+                                  {  0 ,  i , -u ,  k , -j },
+                                  {  0 ,  j , -k , -u ,  i },
+                                  {  0 ,  k ,  j , -i , -u }, };
+                              
+    static boolean isFind, isCorrect;
+    static boolean findI, findJ;
+     
+    public static void main(String args[]) throws Exception{
+        //System.setIn(new FileInputStream("C:\\input\\P_0009.txt"));        
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+         
+        T = Integer.parseInt(br.readLine());
+         
+         
+        for(int t=1; t<=T; t++){
+            st = new StringTokenizer(br.readLine());
+            L = Integer.parseInt(st.nextToken());
+            X = Long.parseLong(st.nextToken());
+             
+                     
+            partialString = br.readLine();
+            int loopI=(int) Long.min(X, 4) * L;
+            int loopJ=0;
+            int loopK=0;
+             
+            currentI = returnVal(partialString.charAt(0));
+             
+            isFind = false;
+            isCorrect = false;
+            findI=false;
+            findJ=false;
+             
+            for(int p=0; p<loopI; p++){
+                if(currentI == i){
+                    //System.out.println(p);
+                    findI = true;
+                    loopJ = (int) Long.min(L*X, p + 4*L + 1);
+                    currentJ = returnVal(partialString.charAt((p+1) % L));
+                    //System.out.println("currentJ " + currentJ);
+                    for(int q=p+1; q<loopJ; q++){
+                        if(currentJ == j){
+                             
+                            findJ = true;
+                            loopK = (int) (       ((L*X-1-q) % L ) + (((L*X-1-q) / L) % 4 ) * L      );
+                            currentK = returnVal(partialString.charAt((q+1) % L));
+                            for(int r=q+1; r<q+loopK; r++){
+                                nextK = returnVal(partialString.charAt((r+1) % L));
+                                currentK = (currentK < 0) ? -1 * hamilton[-currentK][nextK] : hamilton[currentK][nextK];
+                            }
+                            if(currentK == k){
+                                //System.out.println(p+" "+q);
+                                isCorrect=true;                             
+                            }
+                        }                       
+                        else{
+                            //System.out.print(currentJ);
+                            nextJ = returnVal(partialString.charAt((q+1) % L));
+                            currentJ = (currentJ < 0) ? -1 * hamilton[-currentJ][nextJ] : hamilton[currentJ][nextJ];
+                            //System.out.println(" "+ nextJ +" " +currentJ);
+                        }
+                        if(findJ)
+                            break;
+                         
+                    }
+                }
+                else{
+                    nextI = returnVal(partialString.charAt( (p+1) % L));
+                    currentI = (currentI < 0) ? -1 * hamilton[-currentI][nextI] : hamilton[currentI][nextI];  
+                }
+                if(findI)
+                    break;
+            }
+             
+             
+            System.out.print("#"+t+" ");
+             
+            if(isCorrect)
+                System.out.println("YES");
+            else
+                System.out.println("NO");
+             
+        }
+    }
+    static public int returnVal(char x){
+        if(x=='i')
+            return i;
+        if(x=='j')
+            return j;
+        if(x=='k')
+            return k;
+        else
+            return 0;
+    }
+}

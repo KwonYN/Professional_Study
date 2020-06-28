@@ -1,0 +1,118 @@
+#include <string.h>
+#include <cstdio>
+#include <iostream>
+#include <climits>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <math.h>
+#include <stack>
+#include <utility>
+ 
+ 
+using namespace std;
+ 
+#define MAX_NUM 100000
+ 
+typedef long long int l_long;
+  
+ 
+struct edge {
+    l_long x;
+    l_long y;
+    l_long score;
+}countData[MAX_NUM + 1];
+  
+l_long CountAll[1000000 * 4 + 1];
+ 
+void initTable() {
+ 
+    for (int i = 0; i <= MAX_NUM; i++)
+    {
+        countData[i].x = 0;
+        countData[i].y = 0;
+        countData[i].score = 0;
+    }
+ 
+    for (int i = 0; i <= 1000000 * 4; i++)
+        CountAll[i] = 0;
+ 
+}
+ 
+void Update(l_long index) {
+ 
+    while (index > 1) {
+        index /= 2;
+        CountAll[index] = CountAll[index * 2] + CountAll[index*2 + 1];
+    }
+}
+ 
+l_long Sum(l_long start, l_long end) {
+ 
+    l_long rst = 0;
+ 
+    while (start <= end) {
+        if (start % 2 == 1)
+            rst += CountAll[start];
+ 
+        if (end % 2 == 0)
+            rst += CountAll[end];
+ 
+        start = (start + 1) / 2;
+        end = (end - 1) / 2;
+    }
+    return rst;
+}
+ 
+bool compare(edge A, edge B) {
+    return(A.y > B.y);
+}
+ 
+l_long check_leaf(l_long N) {
+ 
+    l_long rst = 1;
+ 
+    while (rst < N)
+        rst *= 2;
+ 
+    rst--;
+ 
+    return rst;
+}
+ 
+ 
+  
+ 
+int main() {
+    int T = 0;
+ 
+    cin.sync_with_stdio(false);
+    cin >> T;
+ 
+    for (int tc = 1; tc <= T; tc++) {
+        int N = 0;
+        l_long leaf_index = 0;
+        l_long Ans = 0;
+        l_long MaxX = LLONG_MIN;
+ 
+        initTable();
+        cin >> N;
+        for (int i = 1; i <= N; i++) {          
+            cin >> countData[i].x >> countData[i].y >> countData[i].score;
+            if (MaxX < countData[i].x) {
+                MaxX = countData[i].x;
+            }
+        }
+  
+        leaf_index = check_leaf(MaxX);
+        sort(countData + 1, countData + 1 + N, compare);  //check 필요 y로 정렬
+ 
+        for (int i = 1; i <= N; i++) {
+            CountAll[leaf_index + countData[i].x] = countData[i].score;
+            Update(leaf_index + countData[i].x);
+            Ans += Sum(leaf_index + countData[i].x + 1, leaf_index + MaxX);
+        }
+        cout << "#" << tc << " " << Ans << endl;
+    }
+    return 0;
+}

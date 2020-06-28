@@ -1,0 +1,90 @@
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <climits>
+ 
+using namespace std;
+ 
+typedef pair<long long, int> pli;
+typedef pair<long long, pair<int, int>> plii;
+ 
+long long D[100001][3], INF = LLONG_MAX;
+vector<pli> v[100001];
+int N, M, K, S, E;
+ 
+void Dijkstra(int s, int e) 
+{
+    priority_queue<plii, vector<plii>, greater<plii>> pq;
+    pq.push({ 0, {s, 0} });
+ 
+    while (!pq.empty()) 
+    {
+        long long acc_cost = pq.top().first;
+        int now_node = pq.top().second.first;
+        int warp = pq.top().second.second;
+        pq.pop();
+ 
+        if (now_node == e) 
+            break;
+        for (int i = 0; i < v[now_node].size(); ++i) 
+        {
+            int edg_cost = v[now_node][i].first;
+            int nxt_node = v[now_node][i].second;
+ 
+            if (acc_cost + edg_cost < D[nxt_node][warp]) 
+            {
+                D[nxt_node][warp] = acc_cost + edg_cost;
+                pq.push({ D[nxt_node][warp], {nxt_node, warp} });
+            }
+ 
+            if (warp + 1 <= K && acc_cost + 1 < D[nxt_node][warp + 1]) 
+            {
+                D[nxt_node][warp + 1] = acc_cost + 1;
+                pq.push({ D[nxt_node][warp + 1], {nxt_node, warp + 1} });
+            }
+        }
+    }
+}
+ 
+int main(void) {
+    int T;
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) 
+    {
+        scanf("%d %d %d", &N, &M, &K);
+ 
+        for (int i = 1; i <= N; i++) 
+        {
+            v[i].clear();
+            for (int j = 0; j <= K; j++) 
+            {
+                D[i][j] = INF;
+            }
+        }
+ 
+        for (int i = 0; i < M; i++) 
+        {
+            int a, b, c;
+            scanf("%d %d %d", &a, &b, &c);
+            v[a].push_back({ c, b });
+            v[b].push_back({ c, a });
+        }
+ 
+        scanf("%d %d", &S, &E);
+         
+        D[S][0] = 0;
+        Dijkstra(S, E);
+ 
+        long long ans = INF;
+        for (int i = 0; i <= K; ++i) 
+        {
+            if (ans > D[E][i])
+            {
+                ans = D[E][i];
+            }
+        }
+ 
+        printf("#%d %lld\n", tc, ans);
+    }
+    return 0;
+}

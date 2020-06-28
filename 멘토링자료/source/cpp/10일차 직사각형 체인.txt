@@ -1,0 +1,30 @@
+#include<iostream>
+#include<string.h>
+using namespace std;
+int t,c,n,d[1000][1000],e[1000][1000],i,j,k;
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(0);
+    cin>>t;
+    for(c=1;c<=t;c++){
+        memset(e,0,sizeof(e));
+        e[0][0]=1;
+        cin>>n;
+        for(i=0;i<n;i++)for(j=0;j<n;j++)cin>>d[i][j];
+        for(i=0;i<n;i++){
+            for(j=0;j<n;j++){
+                int x=i;
+                int y=j-d[i][j];
+                if(y<0)x+=y,y=0;
+                if(x>=0){
+                    e[i][j]=e[x][y];
+                    x-=(j-y+1);
+                    if(j+1<n&&x>=0)e[i][j]-=e[x][j+1];
+                }
+                if(i>0&&j+1<n)e[i][j]+=e[i-1][j+1];
+                if(e[i][j]>=1000000007)e[i][j]-=1000000007;
+                else if(e[i][j]<0)e[i][j]+=1000000007;
+            }
+        }
+        cout<<"#"<<c<<" "<<e[n-1][n-1]<<"\n";
+    }
+}

@@ -1,0 +1,144 @@
+#include <cstdio>
+#include <vector>
+#include <stack>
+#include <set>
+ 
+using namespace std;
+ 
+int T, N, M, Q;
+int island;
+int i_cnt;
+ 
+vector <int> par(300001);
+ 
+struct POINT {                            // 각 숫자별 좌표기억
+    int y, x;
+};
+ 
+int find(int n) {                         // 동맹의 동맹은 동맹
+    if (n == par[n]) return n;
+    return par[n] = find(par[n]);
+}
+ 
+int setNo(vector <POINT> &P, vector <vector <int> > &map)
+{
+    int yy, xx;
+    int plus = 0, minus = 0;         // 각각 섬의 늘어나고, 줄어든 숫자
+    int p, q;
+ 
+    for (unsigned i = 0; i < P.size(); i++) {
+        yy = P[i].y;    xx = P[i].x;
+        vector <int> cand;           // 주변에 섬이 있는 지
+ 
+        if (yy > 1 && map[yy - 1][xx]) cand.push_back(map[yy - 1][xx]);  // ↑
+        if (yy < N && map[yy + 1][xx]) cand.push_back(map[yy + 1][xx]);  // ↓
+        if (xx > 1 && map[yy][xx - 1]) cand.push_back(map[yy][xx - 1]);  // ←
+        if (xx < M && map[yy][xx + 1]) cand.push_back(map[yy][xx + 1]);  // →
+ 
+        if (cand.size() == 0) {      // 주변에 섬이 없으면, 신규 섬 하나 증가
+            island++;
+            plus++;
+            map[yy][xx] = island;
+        }
+        else {                       // 0번 섬의 부모를 현재 위치에 적자
+            p = map[yy][xx] = find(cand[0]);
+            if (cand.size() > 1) {   // 주변에 섬이 둘보다 많으면
+                for (unsigned j = 1; j < cand.size(); j++) {
+                    q = find(cand[j]);
+                    if (p != q) {    // 부모가 다르면 연결시켜주고, 섬 줄어든 숫자 증가
+                        par[q] = p;
+                        minus++;
+                    }
+                }
+            }           
+        }
+    } // for
+ 
+    return plus - minus;             // 섬 숫자 증감 리턴
+}
+ 
+int main()
+{
+    scanf("%d", &T);
+    for (int ts = 1; ts <= T; ts++) {
+        scanf("%d%d", &N, &M);                         // N * M
+ 
+        int a;      
+        for (int i = 1; i <= 300000; i++) par[i] = i;  // 각 섬(island)의 부모 초기화
+ 
+        vector <vector <POINT>> P(100001);
+        for (int y = 1; y <= N; y++) {
+            for (int x = 1; x <= M; x++) {
+                scanf("%d", &a);
+                P[a].push_back({ y, x });              // 점의 좌표 기억
+            }
+        }
+ 
+        scanf("%d", &Q);
+        vector <int> order(Q), o_cnt(100001);          // 지울 순서 기억, 몇번 지우는 지도 기억
+        for (int i = 0; i < Q; i++) {                  // 지울 순서, 몇번 지우는 지 저장
+            scanf("%d", &order[i]);
+            o_cnt[order[i]]++;
+        }
+ 
+        vector <vector <int> > map(N + 1, vector <int>(M + 1)); // 지도 생성
+ 
+        for (int i = 1; i <= 100000; i++) {            // 다 지운 상태로 부터 거꾸로 시작, 즉 안 지워진 점만 기록
+            if (!o_cnt[i] && P[i].size() > 0) {
+                for (unsigned j = 0; j < P[i].size(); j++) {
+                    map[P[i][j].y][P[i][j].x] = i;
+                }
+            }
+        }
+ 
+        island = 0;                                        // 섬 번호
+        vector <vector <bool> > visited(N + 1, vector <bool>(M + 1, false));  // 방문 기록      
+        for (int y = 1; y <= N; y++) {
+            for (int x = 1; x <= M; x++) {
+                if (!map[y][x] || visited[y][x]) continue; // 번호가 있고, 방문 기록이 있으면 섬번호 하나 증가
+                island++;
+ 
+                stack <POINT> tmp;
+                tmp.push({ y, x });
+ 
+                int yy, xx;
+                while (!tmp.empty()) {                     // 특정 섬에 딸린 식구들 기록
+                    yy = tmp.top().y;
+                    xx = tmp.top().x;
+                    tmp.pop();
+ 
+                    visited[yy][xx] = true;
+                    map[yy][xx] = island;                  // 같은 섬번호 입력
+                      
+                    if (yy > 1 && !visited[yy - 1][xx] && map[yy - 1][xx]) tmp.push({ yy - 1, xx });  // ↑
+                    if (yy < N && !visited[yy + 1][xx] && map[yy + 1][xx]) tmp.push({ yy + 1, xx });  // ↓
+                    if (xx > 1 && !visited[yy][xx - 1] && map[yy][xx - 1]) tmp.push({ yy, xx - 1 });  // ←
+                    if (xx < M && !visited[yy][xx + 1] && map[yy][xx + 1]) tmp.push({ yy, xx + 1 });  // →
+                }
+            }
+        }
+ 
+        vector <int> ans(Q);
+        ans[Q - 1] = island;                     // 처음엔 최종 섬의 번호가 섬의 숫자 임
+ 
+        for (int i = Q - 1; i > 0; i--) {        // 거꾸로 하나씩 숫자를 써주자
+            int no = order[i];
+            o_cnt[no]--;                         // ← 주의, 앞에서 미리 지워질 경우가 있는 경우에는 Skip
+            if (o_cnt[no]) {                     // 앞에서 지워져야 한다면 
+                ans[i - 1] = ans[i];
+                continue;
+            }
+            else {                               // 지워진 숫자를 적자
+                int cnt = setNo(P[no], map);     // 섬 숫자의 변동을 받아오자
+ 
+                ans[i - 1] = ans[i] + cnt;
+            }
+        }
+ 
+        printf("#%d ", ts);
+        for (int i = 0; i < Q; i++) printf("%d ", ans[i]);
+        puts("");
+    }
+ 
+    return 0;
+}

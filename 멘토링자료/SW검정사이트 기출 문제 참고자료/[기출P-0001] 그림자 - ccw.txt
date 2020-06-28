@@ -1,0 +1,103 @@
+import java.io.*;
+import java.util.*;
+ 
+public class Solution {
+    static class Direction implements Comparable<Direction> {
+        public int x1, y1, x2, y2, xd, yd;
+        @Override
+        public int compareTo(Direction other) {
+            int ret = 0;
+            long a = (long)this.yd*other.xd - (long)other.yd*this.xd;
+            ret = (0 == a)? 0 : (0 > a)? -1 : 1;
+            if (0 == ret) ret = ccw(this.x1, this.y1, this.x2, this.y2, other.x1, other.y1);
+            return ret;
+        }
+    }
+    static class Point {
+        public int x, y;
+    }
+    static int N;
+    static Point[] P = new Point[1001];
+    static Direction[] D = new Direction[500000];
+    static int[] Answer = new int[1001];
+     
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+ 
+        for (int i = 0; i < 500000; i++) D[i] = new Direction();
+        for (int i = 1; i <= 1000; i++) P[i] = new Point();
+         
+        int T = Integer.parseInt(br.readLine());
+        for (int test_case = 1; test_case <= T; test_case++) {
+            N = Integer.parseInt(br.readLine());
+            StringTokenizer st;
+            for (int i = 1; i <= N; i++) {
+                Answer[i] = 0;
+                st = new StringTokenizer(br.readLine());
+                P[i].x = Integer.parseInt(st.nextToken());
+                P[i].y = Integer.parseInt(st.nextToken());
+            }
+             
+            solve();
+             
+            bw.write("#" + test_case + " ");
+            for (int n = 1; n < N; n++) {
+                bw.write(Answer[n] + " ");
+            }
+            bw.write("\n");
+        }
+        bw.flush();
+        bw.close();
+    }
+    private static void solve() {
+        int k = 0, x1, y1, x2, y2;
+        for (int i = 1; i <= N; i++) {
+            for (int j = i+1; j <= N; j++) {
+                x1 = P[i].x; y1  = P[i].y; x2 = P[j].x; y2 = P[j].y;
+                if (x1 > x2 || (x1 == x2 && y1 > y2)) { x1 = P[j].x; y1  = P[j].y; x2 = P[i].x; y2 = P[i].y; }
+                D[k].x1 = x1; D[k].y1 = y1;
+                D[k].x2 = x2; D[k].y2 = y2;
+                D[k].xd = D[k].x2-D[k].x1; D[k].yd = D[k].y2-D[k].y1;
+                k++;
+            }
+        }
+         
+        Arrays.sort(D, 0, k);
+         
+        int x = 0, cnt = 1, shadow = N;
+        boolean newA = false;
+        for (int i = 1; i < k; i++) {
+            newA = false;
+            int p1 = (0 == D[i-1].xd)? 0 : (0 > D[i-1].xd)? -1 : 1;
+            int p2 = (0 == D[i].xd)? 0 : (0 > D[i].xd)? -1 : 1;
+            if (p1 != p2 || (0 == p1 && 0 == p2 && 0 > D[i-1].yd && 0 < D[i].yd)) newA = true;
+            else if (0 != (long)D[i-1].yd*D[i].xd - (long)D[i].yd*D[i-1].xd) newA = true;
+             
+            if (newA) {
+                shadow -= (get(cnt)-1);
+                Answer[shadow]+=2;
+                x = i; cnt = 1; shadow = N;
+            }
+            else {
+                int c = ccw(D[x].x1, D[x].y1, D[x].x2, D[x].y2, D[i].x1, D[i].y1);
+                if (0 == c) cnt++;
+                else {
+                    shadow -= (get(cnt)-1);
+                    x = i; cnt = 1;
+                }
+            }
+        }
+        shadow -= (get(cnt)-1);
+        Answer[shadow]+=2;
+    }
+ 
+    private static int get(int cnt) {       
+        return (1+(int)Math.sqrt(1+8*cnt))/2;
+    }
+     
+    public static int ccw(int x1, int y1, int x2, int y2, int x3, int y3) {
+        long ret = (long)(x2-x1)*(y3-y1) - (long)(x3-x1)*(y2-y1);
+        return (0 == ret)? 0 : (0 > ret)? -1 : 1;
+    }
+}

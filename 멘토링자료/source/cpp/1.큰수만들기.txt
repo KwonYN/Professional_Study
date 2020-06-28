@@ -1,0 +1,31 @@
+#include <algorithm>
+#include <cstdio>
+#include <deque>
+using namespace std;
+ 
+ 
+int T, N, K;
+char ins[500003];
+ 
+int main() {
+    scanf("%d", &T);
+    for (int t = 1; t <= T; t++) {
+        scanf("%d %d", &N, &K);
+        scanf(" %s", ins);
+        int sz = 0,cnt =0;
+        deque<char> dq;
+        for (int i = 0; i < N; i++) {
+            while (!dq.empty() && dq.back() < ins[i] && cnt < K) {
+                dq.pop_back();
+                cnt++;
+            }
+            dq.push_back(ins[i]);
+        }
+        printf("#%d ", t);
+        while (!dq.empty()&&sz<N-K) {
+            printf("%c", dq.front()), dq.pop_front();
+            sz++;
+        }
+        printf("\n");
+    }
+}

@@ -1,0 +1,19 @@
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+ 
+int main() {
+    int tt, n, a;
+    scanf("%d", &tt);
+    for (int tc = 1 ; tc <= tt ; tc++) {        
+        scanf("%d", &n);
+        vector<int> p;
+        while (n-- > 0) {
+            scanf("%d", &a);
+            if (p.empty() || p.back() < a) p.push_back(a);
+            *lower_bound(p.begin(), p.end(), a) = a;
+        }
+        printf("#%d %d\n", tc, p.size());
+    }
+}

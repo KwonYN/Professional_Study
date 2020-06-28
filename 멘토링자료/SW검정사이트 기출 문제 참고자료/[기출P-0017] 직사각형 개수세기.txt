@@ -1,0 +1,83 @@
+
+import java.io.*;
+import java.util.*;
+ 
+public class Solution {
+ 
+        static  int T, N, M;
+        static  char[][] ARR;
+        static  int[][] UPC, LEC;
+        static  long result;
+ 
+ public static void main(String[] args) throws Exception {           
+            //System.setIn(new FileInputStream("sample_input.txt"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            StringTokenizer StrTk;
+            T = Integer.parseInt(br.readLine().trim());
+ 
+            for(int t=1; t<=T; t++){
+                StrTk = new StringTokenizer(br.readLine());
+                N  = Integer.parseInt(StrTk.nextToken());
+                M = Integer.parseInt(StrTk.nextToken());
+                ARR = new char[N+1][M+1];            
+                UPC   = new int[N+1][M+1];    //사각형의 갯수
+                LEC  = new int[N+1][M+1];    // 왼쪽으로의 1의 갯수
+                result=0;
+                 
+                for(int i=0; i<=N; i++) {
+                    for(int j=0; j<M; j++) {
+                        ARR[i][j] = '0';
+                    }
+                }
+                // 자신을 포함하는 직사각형내의 1의 갯수의 합을 구하는게 핵심
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                // 예를 들어
+                // 문제1의포함한 갯수  
+                // 0 1 0  ->    0 1 0      => 정답은 모든수의 합 : 8  
+                // 1 1 1  ->    1 3 3
+                // 각 Node에서 왼쪽 그리고 위방향으로 자신을 포함해서 0을 만날때 까지의
+                // 1의 갯수를 세어서 값을 보관하고
+                // 왼쪽의 1의 갯수는 LEC배열에 저장
+                // 위쪽의 1의 갯수는 UPC배열에 저장해서 1의 갯수 세는데 활용
+                 
+                // 특히 위쪽으로 하나씩 올라갈때 계산하고자 하는
+                // 현재 Node값의 LEFT 배열에 있는 1의 갯수보다 적으면 더이상 위로 올라가면서 계산하지 않고
+                // 그값을 가져와서 사용함
+ 
+                String tmp = null;
+                for(int i=1; i<=N; i++) {
+                    tmp = br.readLine();
+                    for(int j=0; j<M; j++) {
+                        ARR[i][j+1] = tmp.charAt(j);
+                        if(ARR[i][j+1] == '1') LEC[i][j+1] = LEC[i][j] + 1;   // 현재위치에서 왼쪽에 1이 몇개있는지 저장
+                    }
+                }
+ 
+                int tmpN = 0, minL = 0;
+                 
+                for(int i=1; i<=N; i++) {
+                    for(int j=1; j<=M; j++) {
+ 
+                        if(ARR[i][j] == '1') { //if -------------------------------
+                            tmpN = LEC[i][j];            // 1일때 현재에서 왼쪽으로 1인 값
+                            minL  = tmpN;                // 자신의 왼쪽 1의 갯수 값을 가지고 있다가 위쪽으로 올라가면서 하나씩 비교
+ 
+                            for(int k=i-1; k>0; k--) {    // 현재위치에서 위쪽으로 0을 만날때까지 Loop
+                                if(ARR[k][j] == '0') break;  // 0일때 종료 
+                                if(minL >= LEC[k][j]) {        // minL 보다 작거나 같으면 여기에 저장된 사각형 갯수를 가져오고 종료 
+                                    tmpN += UPC[k][j];
+                                    break;
+                                } 
+                                else {                             // minL 보다 크면 minL값을 더함
+                                    tmpN += minL;
+                                }
+                            }
+                            UPC[i][j]  = tmpN;               // 사각형갯수 저장
+                            result     += tmpN;
+                        } //if -------------------------------
+                    } //for M
+                } // for N
+                System.out.println("#" + t + " " + result);
+            } //test case
+        }
+    }

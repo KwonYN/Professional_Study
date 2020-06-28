@@ -1,0 +1,94 @@
+/*
+* 알고리즘 순서
+* 1. in-bound 가 0인 곳을 찾아 큐에 넣습니다.
+* 2. 큐에 노드가 없어질 때까지 , 큐에서 하나씩 노드를 빼 거리를 비교하여 큰값을 저장합니다.
+* 3. 마지막 노드에 기록된 거리가 정답 
+* MAXN = 노드 갯수 , MAXM = 엣지갯수
+*/
+#include <bits/stdc++.h>
+ 
+#define MAXN 1000001 
+#define MAXM 3000001
+ 
+using namespace std;
+struct edge
+{
+    int to;
+    int w;
+    struct edge * next;
+};
+ 
+struct node 
+{
+    int num;
+    int dis;
+    int in_bound;
+    struct edge * eds;
+};
+ 
+struct edge edges[MAXM];
+struct node nodes[MAXN];
+ 
+ 
+int main()
+{
+    int test_case;
+    scanf("%d",&test_case);
+    for(int test = 1; test <= test_case ; test++)
+    {
+        int n,m;
+        scanf("%d %d",&n,&m);
+         
+        //노드와 엣지들을 초기화해줍니다.
+        for(int i =1 ; i<= n ; i++)
+        {
+            nodes[i].num = i;
+            nodes[i].eds = NULL;
+            nodes[i].dis = 0;
+            nodes[i].in_bound = 0;
+        }
+        for(int i =1 ; i <= m ; i++)
+        {
+            edges[i].to = 0;
+            edges[i].w = 0;
+            edges[i].next = NULL;
+        }
+         
+        // 엣지들을 입력 받습니다.
+        for(int i =1 ; i <=m ; i++)
+        {
+            int from, to , time;
+            scanf("%d %d %d",&from ,&to, &time);
+            edges[i].to = to;
+            edges[i].w = time;
+            edges[i].next = nodes[from].eds;
+            nodes[from].eds = &edges[i];
+            nodes[to].in_bound++;
+        }
+         
+        queue<int> q;
+        // in_bound가 0인 노드들을 모두 큐에 넣습니다.
+        for(int i = 1 ; i <= n ; i++)
+            if( nodes[i].in_bound == 0 )
+                q.push(i);
+        //큐가 빌때까지 in_bound가 0인 노드들을 방문하면서 새롭게 시간들을 계산해줍니다.
+        while(!q.empty())
+        {
+            int num_v = q.front(); q.pop();
+            for( struct edge * cur = nodes[num_v].eds ; cur != NULL ; cur = cur->next)
+            {
+                int to = cur->to;
+                int time = cur->w;
+                if( nodes[to].dis < nodes[num_v].dis + time)
+                    nodes[to].dis = nodes[num_v].dis + time;
+                nodes[to].in_bound--;
+                //만약 목적지 노드의 in_bound가 0이 된다면 큐에 넣어줍니다.
+                if(nodes[to].in_bound == 0)
+                    q.push(to);
+            }
+        }
+        //목적지 n노드의 시간을 출력해줍니다.
+        printf("#%d %d\n",test,nodes[n].dis);
+         
+    }
+}

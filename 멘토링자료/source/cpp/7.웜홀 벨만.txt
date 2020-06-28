@@ -1,0 +1,71 @@
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <cstring>
+ 
+using namespace std;
+ 
+#define INF 0x7fffffff
+#define MAX_N 501
+ 
+struct pp{
+    int idx, cost;
+    pp(int a, int b){
+        idx = a; cost = b;
+    }
+};
+ 
+int T, N, M, W;
+vector<pp> A[MAX_N];
+ 
+void initialization()
+{
+    memset(&A, 0x00, sizeof(A));
+}
+ 
+bool bellmanFord()
+{
+    bool updated = false;
+    vector<int> upper(N + 1, INF);
+    upper[1] = 0;
+     
+    for (int k = 1; k <= N; k++) {
+        for (int i = 1; i <= N; i++) {
+            updated = false;
+            for (int j = 0; j < A[i].size(); j++) {
+                if (upper[i] != INF && upper[A[i][j].idx] > upper[i] + A[i][j].cost)
+                    updated = true, upper[A[i][j].idx] = upper[i] + A[i][j].cost;
+            }
+ 
+            if (k == N && updated) return true;
+        }
+    }
+ 
+    return false;
+}
+ 
+int main(void)
+{
+    scanf("%d", &T);
+    for (int t = 1; t <= T; t++)
+    {
+        initialization();
+        scanf("%d %d %d", &N, &M, &W);
+ 
+        // ¾ç¹æÇâ
+        for (int m = 0; m < M; m++) {
+            int a, b, c; scanf("%d %d %d", &a, &b, &c);
+            A[a].push_back(pp(b, c)), A[b].push_back(pp(a, c));
+        }
+ 
+        // ¿úÈ¦
+        for (int w = 0; w < W; w++) {
+            int a, b, c; scanf("%d %d %d", &a, &b, &c);
+            A[a].push_back(pp(b, -c));
+        }
+ 
+        bellmanFord() == true? printf("#%d YES\n", t) : printf("#%d NO\n", t);
+    }
+ 
+    return 0;
+}

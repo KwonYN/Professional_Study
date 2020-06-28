@@ -1,0 +1,39 @@
+#include <cstdio>
+ 
+#define MAX_INDEX 200
+ 
+int counts[MAX_INDEX + 1][MAX_INDEX + 1];
+ 
+int main() {
+    int TC, iCase, i, j, k, c, N, M;
+ 
+    scanf("%d", &TC);
+ 
+    for (iCase = 1; iCase <= TC; ++iCase) {
+        scanf("%d %d", &N, &M);
+ 
+        for (i = 1; i <= N; ++i) {
+            for (j = 1; j <= N; ++j) counts[i][j] = 0;
+        }
+ 
+        while (--M >= 0) {
+            scanf("%d %d", &i, &j);
+            counts[i][j] = counts[j][i] = 1;
+        }
+ 
+        for (i = N; i > 0; --i) {
+            for (j = i + 1; j <= N; ++j) {
+                if (j > i + 1) counts[i][j] += counts[i + 1][j - 1];
+                for (k = j; k > i; --k) {
+                    c = counts[k][j] + counts[i][k - 1];
+                    if (c > counts[i][j]) counts[i][j] = c;
+                }
+            }
+        }
+ 
+        printf("#%d %d\n", iCase, counts[1][N]);
+ 
+    }
+ 
+    return 0;
+}

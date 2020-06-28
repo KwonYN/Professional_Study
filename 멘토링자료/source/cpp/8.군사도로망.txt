@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+ 
+#define MAX_N 100001
+ 
+struct Edge {
+    int v, w;
+    int cost;
+    bool exist;
+ 
+    bool operator<(const Edge& e) const {
+        return cost < e.cost;
+    }
+};
+ 
+int n, m, k;
+vector<Edge> edges;
+int parent[MAX_N];
+long long ans;
+ 
+int find(int a) {
+    if (parent[a] == a) return a;
+    else return parent[a] = find(parent[a]);
+}
+void Union(int a, int b) {
+    int roota = find(a);
+    int rootb = find(b);
+    parent[roota] = rootb;
+}
+ 
+void kruskal() {
+    sort(edges.begin(), edges.end());
+    for (Edge e : edges) {
+ 
+        int vroot = find(e.v);
+        int wroot = find(e.w);
+        if (vroot != wroot) {
+            Union(e.v, e.w);
+            ans += e.cost;
+        }
+    }
+ 
+}
+ 
+int main() {
+    int T;
+    scanf("%d", &T);
+    for (int t = 1; t <= T; t++) {
+ 
+        edges.clear();
+        for (int i = 0; i < MAX_N; i++) {
+            parent[i] = i;
+        }
+ 
+        scanf("%d %d %d", &n, &m, &k);
+        ans = 0;
+        for (int i = 0; i < m; i++) {
+            int v, w, cost;
+            scanf("%d %d %d", &v, &w, &cost);
+            ans += cost;
+            struct Edge e;
+            e.v = v; e.w = w; e.cost = 0 - cost; e.exist = true; 
+            edges.push_back(e);
+        }
+        kruskal();
+     
+        edges.clear();
+        for (int i = 0; i < k; i++) {
+            int v, w, cost;
+            scanf("%d %d %d", &v, &w, &cost);
+            struct Edge e;
+            e.v = v; e.w = w; e.cost = cost; e.exist = false;
+            edges.push_back(e);
+        }
+        kruskal();
+         
+        printf("#%d %lld\n", t, ans);
+    }
+}

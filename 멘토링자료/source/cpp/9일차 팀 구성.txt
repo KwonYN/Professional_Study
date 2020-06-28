@@ -1,0 +1,54 @@
+#include <cstdio>
+ 
+typedef long long ll;
+ 
+inline ll max(ll a, ll b) { return a > b ? a : b; }
+inline ll abs(ll a) { return a > 0 ? a : -a; }
+ 
+int N;
+int A[200004];
+ 
+// L0[i] : i번째 수를 포함하여 왼쪽수들을 포함했을때 최대 연속 부분합
+// L1[i] : i번째 수를 제외하고 왼쪽수들을 포함했을때 1개 빼고 최대 연속 부분합
+ll L0[200004], L1[200004];  
+ll R0[200004], R1[200004];
+ 
+ll Ans[200004];
+ll AnsSum;
+ 
+int main() {
+    int T;
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        scanf("%d", &N);
+        for (int i = 1; i <= N; i++) {
+            scanf("%d", A + i);
+            Ans[i] = 0ll;
+        }
+ 
+        // L0, L1
+        L0[0] = L1[0] = 0ll;
+        for (int i = 1; i <= N; i++) {
+            L0[i] = max(L0[i - 1] + A[i], A[i]);
+            L1[i] = max(L1[i - 1] + A[i], L0[i - 1]);
+        }
+        // R0, R1
+        R0[N + 1] = R1[N + 1] = 0ll;
+        for (int i = N; i >= 1; i--) {
+            R0[i] = max(R0[i + 1] + A[i], A[i]);
+            R1[i] = max(R1[i + 1] + A[i], R0[i + 1]);
+        }
+ 
+        // 각 인원별 팀구성 최대치 구하기
+        AnsSum = 0ll;
+        for (int i = 1; i <= N; i++) {
+            Ans[i] = max(L0[i] + R0[i] - A[i], L0[i] + R1[i + 1]);
+            Ans[i] = max(Ans[i], L1[i - 1] + R0[i]);
+            Ans[i] = abs(Ans[i]);
+            AnsSum += Ans[i];
+        }
+        AnsSum %= 1000000007;
+        printf("#%d %lld\n", tc, AnsSum);
+    }
+    return 0;
+}

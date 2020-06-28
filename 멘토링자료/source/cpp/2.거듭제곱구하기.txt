@@ -1,0 +1,19 @@
+#include <stdio.h>
+ 
+#define MOD   1000000007
+ 
+typedef long long lld;
+ 
+int T;
+ 
+int main(){
+  scanf("%d",&T);
+  for(int ts=1;ts<=T;ts++){
+    lld a,m;scanf("%lld%lld",&a,&m);
+    int ans=1;
+    for(lld p=m;p;p>>=1,a=(a%MOD*a%MOD)%MOD)
+      if(p&1) ans=(ans%MOD*a%MOD)%MOD;
+ 
+    printf("#%d %d\n",ts,ans);
+  }
+}

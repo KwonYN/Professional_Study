@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define pii pair<int,int>
+#define fi first
+#define se second
+#define ll long long
+ 
+ 
+struct Node{
+    int x,y,c;
+    bool operator<(const Node &ot)const{
+        return x==ot.x?y>ot.y:x>ot.x;
+    }
+};
+int y[100001],N,T,n;
+ll tree[100001];
+Node arr[100001];
+void push(int x,int val){
+    while(x<=N){
+        tree[x]+=val;
+        x+=x&-x;
+    }
+}
+ll get(int x){
+    ll ret=0ll;
+    while(x){
+        ret+=tree[x];
+        x-=x&-x;
+    }
+    return ret;
+}
+ 
+int main(){
+    scanf("%d",&T);
+    for(int t=1;t<=T;t++){
+        scanf("%d",&N);
+        for(int i=1;i<=N;i++){
+            scanf("%d %d %d",&arr[i].x,&arr[i].y,&arr[i].c);
+            y[i] = -arr[i].y;
+        }
+        sort(y+1,y+1+N);
+        sort(arr+1,arr+1+N);
+        ll ret=0ll;
+        for(int i=1;i<=N;i++){
+            int pos = lower_bound(y+1,y+1+N,-arr[i].y)-y;
+            ret +=get(pos);
+            push(pos,arr[i].c);
+        }
+        memset(tree,0,sizeof(tree));
+        printf("#%d %lld\n",t,ret);
+    }
+}

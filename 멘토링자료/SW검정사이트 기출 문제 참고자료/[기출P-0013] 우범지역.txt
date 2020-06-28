@@ -1,0 +1,84 @@
+import java.io.*;
+import java.util.*;
+ 
+public class Solution {
+     
+    public static void main(String[] args) throws Exception {
+        int T, N, K;
+        ArrayList<Integer>[] path;
+        int node[][];
+        Queue<Integer> que;
+        int[][] D;
+         
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        T = Integer.parseInt(br.readLine());
+         
+        for (int tc = 1; tc <= T; tc++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            N = Integer.parseInt(st.nextToken());
+            K = Integer.parseInt(st.nextToken());
+             
+            path = new ArrayList[N+1];
+            node = new int[N+1][4];    // 0:path개수, 1:우범지대여부, 2: 처리여부, 3: 상위노드
+            for (int i = 1; i <= N; i++) 
+                path[i] = new ArrayList<>();
+             
+            for (int i = 1; i <= N-1; i++) {
+                st = new StringTokenizer(br.readLine());
+                int a = Integer.parseInt(st.nextToken());
+                int b = Integer.parseInt(st.nextToken());
+                 
+                path[a].add(b);  node[a][0]++;
+                path[b].add(a);  node[b][0]++;
+            }
+             
+            st = new StringTokenizer(br.readLine());
+            for (int i = 1; i <= N; i++) 
+                node[i][1] = Integer.parseInt(st.nextToken());      
+             
+            que = new LinkedList<>();
+            for (int i = 1; i <= N; i++) 
+                if (node[i][0] == 1) que.add(i);
+             
+            D = new int[N+1][K+1];
+            while (!que.isEmpty()) {
+                int current = que.poll();
+                         
+                for (int i = 0; i <= K; i++) 
+                    D[current][i] += node[current][1];
+                node[current][2] = 1;   //현재노드 처리 완료
+                             
+                for (int i = 0; i < path[current].size(); i++) {
+                    int q = path[current].get(i);
+                     
+                    if (node[q][2] == 1) {  // child node
+                        for (int j = 1; j <= K; j++) 
+                            D[current][j] += D[q][j-1];
+                    }
+                    else {  // parent node
+                        node[current][3] = q;  // parent node 정보 
+                        node[q][0]--;
+                        if (node[q][0] == 1) 
+                            que.add(q);
+                    }
+                }
+            }
+             
+            long ans = 0;
+            for (int i = 1; i <= N; i++) {
+                int current = i;
+                int before = 0;
+                for (int j = K; j >= 0; j--) {
+                    if (current > 0) {
+                        ans += (long)D[current][j];
+                        if (j > 0) ans -= (long)D[before][j-1];
+                        before = current;
+                        current = node[current][3];   //parent node
+                    }
+                }
+            }
+             
+            System.out.println("#" + tc + " " + ans);   
+        }
+    }
+}

@@ -1,0 +1,64 @@
+#include <stdio.h>
+ 
+int N, M, W;
+int node[6001][3];
+int dist[501];
+ 
+int main(void)
+{
+ int t;
+ scanf("%d", &t);
+  
+ for(int i = 1; i <= t; i++){
+   
+  scanf("%d %d %d", &N, &M, &W);
+  int x, y, z;
+ 
+  for(int i = 1; i <= M; i++){
+   scanf("%d %d %d", &x, &y, &z);
+   node[i][0] = x;
+   node[i][1] = y;
+   node[i][2] = z;
+   node[i+M+W][0] = y;
+   node[i+M+W][1] = x;
+   node[i+M+W][2] = z;
+  }
+ 
+  for(int i = 1; i <= W; i++){
+   scanf("%d %d %d", &x, &y, &z);
+   node[i+M][0] = x;
+   node[i+M][1] = y;
+   node[i+M][2] = -z;
+  }
+ 
+  for(int i = 1; i <= N; i++)
+   dist[i] = 1000000;
+ 
+  bool tf, ans = true;
+ 
+  for(int i = 1; i <= N; i++){
+   tf = true;
+   for(int j = 1; j <= M + W + M; j++ ){
+    x = node[j][0];
+    y = node[j][1];
+    z = node[j][2];
+ 
+    if(dist[x] + z < dist[y])
+    {
+     dist[y] = dist[x] + z;
+     tf = false;
+    }
+   }
+ 
+   if(tf)
+   {
+    ans = false;
+    break;
+   }
+  }
+ 
+  printf("#%d %s\n", i, ans ? "YES" : "NO");
+ }
+ 
+ return 0;
+}

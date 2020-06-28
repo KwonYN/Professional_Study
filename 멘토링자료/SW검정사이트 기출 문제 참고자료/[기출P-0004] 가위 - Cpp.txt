@@ -1,0 +1,50 @@
+#include <cstdio>
+ 
+const int MAX = 1001;
+int band[MAX];
+int N, K, ans;
+ 
+//주어진 코스트로 K보다 가위질을 많이 하는가? 
+bool check(int cost){
+    int cnt = 0;
+    int max = band[1], min = band[1];
+ 
+    for (int i = 2; i <= N; i++){
+        if (band[i] > max) max = band[i];
+        if (band[i] < min) min = band[i];
+ 
+        if ((max - min) > cost){
+            cnt++; 
+            max = band[i]; min = band[i];
+        }
+    }
+    return (cnt <= K);
+}
+ 
+ 
+int main(){
+    int T;
+    scanf("%d", &T);
+ 
+    for (int t = 1; t <= T; t++){
+        scanf("%d %d", &N, &K);
+ 
+        for (int i = 1; i <= N; i++)
+            scanf("%d", &band[i]);
+ 
+        int f = 0, l = 1000000, mid;
+        while (f <= l){
+            mid = (f + l) / 2;
+            if (check(mid)){
+                l = mid - 1;
+                ans = mid;
+            }
+            else{
+                f = mid + 1;
+            }
+        }
+ 
+        printf("#%d %d \n", t, ans);
+    }
+    return 0;
+}

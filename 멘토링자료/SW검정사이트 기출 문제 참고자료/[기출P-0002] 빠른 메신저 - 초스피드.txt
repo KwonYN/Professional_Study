@@ -1,0 +1,133 @@
+import java.io.*;
+import java.util.*;
+ 
+public class Solution {
+    static int T, N;
+    static class Square{
+        int x1;
+        int x2;
+        int y1;
+        int y2;
+         
+        public Square(int x1, int x2, int y1, int y2){
+            this.x1 = x1;
+            this.x2 = x2;
+            this.y1 = y1;
+            this.y2 = y2;
+        }
+    }
+     
+    static Square[] Order;
+     
+    static ArrayList<Integer> xList;
+    static ArrayList<Integer> yList;
+     
+    static int[][] Color;
+    static int[] Area;
+    static int MaxCount, MinCount;
+    static int AnswerMax, AnswerMin;
+    static int[] MaxIndex;
+    static int[] MinIndex;
+     
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+         
+        T = sc.nextInt();
+        for(int test_case = 1; test_case <= T; test_case++){
+            N = sc.nextInt();
+             
+            Order = new Square[N+1];
+            Area = new int[N+1];
+             
+            xList = new ArrayList<Integer>();
+            yList = new ArrayList<Integer>();
+            for(int i = 1; i <= N; i++){
+                int x = sc.nextInt();
+                int y = sc.nextInt();
+                int l = sc.nextInt();
+                 
+                Order[i] = new Square(x, x+l, y, y+l);
+                xList.add(x);
+                xList.add(x+l);
+                yList.add(y);
+                yList.add(y+l);
+            }
+             
+            Color = new int[2*N][2*N];
+             
+            Collections.sort(xList);
+            unique(xList);
+            Collections.sort(yList);
+            unique(yList);
+             
+            for(int i = 1; i <= N; i++){
+                Order[i].x1 = xList.indexOf(Order[i].x1);
+                Order[i].x2 = xList.indexOf(Order[i].x2);
+                Order[i].y1 = yList.indexOf(Order[i].y1);
+                Order[i].y2 = yList.indexOf(Order[i].y2);
+                for(int x = Order[i].x1; x < Order[i].x2; x++){
+                    for(int y = Order[i].y1; y < Order[i].y2; y++){
+                        Color[x][y] = i;
+                    }
+                }
+            }
+             
+            for(int x = 0; x < xList.size()-1; x++){
+                int orderNum=0;
+                for(int y = 0; y < yList.size()-1; y++){
+                    orderNum = Color[x][y];
+                    if(orderNum==0) continue;
+                    Area[orderNum] += (xList.get(x+1)-xList.get(x))*(yList.get(y+1) - yList.get(y));
+                }
+            }
+             
+            MaxCount = 0;
+            MinCount = 0;
+            AnswerMax = 0;
+            AnswerMin = -1;
+             
+            MinIndex = new int[N+1];
+            MaxIndex = new int[N+1];
+            for(int i = 1; i <= N; i++){
+                if(Area[i] == 0) continue;
+                if(AnswerMin == -1 || AnswerMin > Area[i]){
+                    MinCount = 1;
+                    AnswerMin = Area[i];
+                    MinIndex[MinCount] = i;
+                } else if(AnswerMin == Area[i]){
+                    MinIndex[++MinCount] = i; 
+                }
+                if(AnswerMax < Area[i]){
+                    MaxCount = 1;
+                    AnswerMax = Area[i];
+                    MaxIndex[MaxCount] = i;
+                } else if(AnswerMax == Area[i]){
+                    MaxIndex[++MaxCount] = i;
+                }
+            }
+             
+            System.out.print("#"+test_case+" ");
+            System.out.print(MinCount + " ");
+            for(int i = 1; i <= MinCount; i++){
+                System.out.print(MinIndex[i] + " " + AnswerMin + " ");
+            }
+            System.out.println();
+            System.out.print(MaxCount + " ");
+            for(int i = 1; i <= MaxCount; i++){
+                System.out.print(MaxIndex[i] + " " + AnswerMax + " ");
+            }
+            System.out.println();
+        }
+    }
+ 
+    private static void unique(ArrayList<Integer> list) {
+        int index = 1;
+        while(index < list.size()){
+            if(list.get(index) == list.get(index-1)){
+                list.remove(index);
+            } else {
+                index++;
+            }
+        }
+    }
+}

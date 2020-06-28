@@ -1,0 +1,209 @@
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+#include <vector>
+#include <string.h>
+  
+using namespace std;
+  
+/*
+  
+메인 함수
+  
+for i 1 ~ n
+for j 1 ~ m
+  
+입력(seom)
+벡터[seom].푸쉬백(y, x)
+  
+BFS(y, x, node)
+{
+    while q
+    사방 체크
+    같은 cnt 입력
+}
+  
+for i : Q ~ 1
+만약 처음 나옴 아님(fa[i] != i) continue;
+  
+for (node : edges[order[i]])
+{
+    cnt++;
+    seom[node.first][node.second] = order[i];
+    node[node.first][node.second] = cnt; 
+    q에다 집어넣고
+    q가 빈동안
+    pop하면서
+    만약 상하좌우 node 값이 다른애가 하나라도 나오면
+    unite cnt --
+}
+  
+최종적으로 cnt 출력`
+*/
+typedef pair<int, int> pii;
+  
+int T;
+int N, M;
+vector<pii> edges[101000];
+int map[550][550];
+int visit[550][550];
+  
+int Q;
+  
+int updown[4] = {-1, 1, 0, 0};
+int leftright[4] = {0, 0, -1, 1};
+  
+int cnt; // 일단 가장 마지막 상태 지도에 몇개 있는지 확인
+  
+int fa[251000];
+int destroyed[101000];
+int set[251000];
+  
+int ans[101000];
+  
+  
+int find(int a)
+{
+    if (set[a] == a) return a;
+    else return set[a] = find(set[a]);
+}
+  
+void unite(int a, int b)
+{
+    int aroot = find(a);
+    int broot = find(b);
+  
+    set[aroot] = broot;
+}
+  
+void BFS(int y, int x)
+{
+    queue<pii> q;
+    q.push({y, x});
+    visit[y][x] = ++cnt;
+  
+    while(!q.empty())
+    {
+        pii out = q.front(); q.pop();
+        for (int i = 0; i < 4; i++)
+        {
+            int ny = out.first + updown[i];
+            int nx = out.second + leftright[i];
+            if (visit[ny][nx] || map[ny][nx] == -1) continue;
+            visit[ny][nx] = cnt;
+            q.push({ny, nx});
+        }
+    }
+  
+  
+  
+}
+  
+int main(void)
+{
+    //freopen("in.txt", "r", stdin);
+    int tc, i, j;
+    scanf("%d", &T);
+      
+     
+    for (tc = 1; tc <= T; tc++)
+    {
+        memset(visit, 0, sizeof(visit));
+        queue<pii> q;
+        memset(fa, -1, sizeof(fa));
+        memset(map, -1, sizeof(map));
+        for (i = 0; i < 251000; i++) 
+        {
+            set[i] = i;
+        }
+          
+        cnt = 0;
+        scanf("%d %d", &N, &M);
+          
+        for (i = 1; i <= 100100; i++) edges[i].clear();
+  
+        for (i = 1; i <= N; i++)
+        {
+            for (j = 1; j <= M; j++)
+            {
+                scanf("%d", &map[i][j]);
+                edges[map[i][j]].push_back({i, j});
+            }
+        }
+  
+        scanf("%d", &Q);
+  
+        for (int i = 1; i <= Q; i++)
+        {
+            scanf("%d", &j);
+            destroyed[i] = j;
+            if (fa[j] == -1) 
+            {
+                fa[j] = i;
+                for (pii next : edges[j])
+                {
+                    map[next.first][next.second] = -1;
+                }
+            }
+        }
+  
+        // BFS를 돌면서 cnt 개수 세기.
+        for (i = 1; i <= N; i++)
+        {
+            for (j = 1; j <= M; j++)
+            {
+                if (map[i][j] == -1 || visit[i][j]) continue;
+                BFS(i, j);
+            }
+        }
+        // 여기까진 확실히 
+        ans[Q] = cnt;
+        // 없어진 애들을 하나씩 넣어준다.
+        int nodecnt = cnt + 1;  
+        for (i = Q; i > 1; i--)
+        {
+            int num = destroyed[i];
+            if (fa[num] != i) 
+            {
+                ans[i - 1] = cnt;
+                continue;
+            }
+              
+            for (pii next : edges[num])
+            {
+                //visit[next.first][next.second] = cnt;
+                map[next.first][next.second] = num;
+                for (j = 0; j < 4; j++)
+                {
+                    int ny = next.first + updown[j];
+                    int nx = next.second + leftright[j];
+                    if (map[ny][nx] == -1) continue;
+                    if (visit[next.first][next.second] == 0) visit[next.first][next.second] = find(visit[ny][nx]);
+                    if (find(visit[ny][nx]) != find(visit[next.first][next.second]))
+                    {
+                        cnt--;
+                        unite(visit[ny][nx], visit[next.first][next.second]);
+                    }
+                } 
+                if (visit[next.first][next.second] == 0) 
+                {
+                    visit[next.first][next.second] = ++nodecnt;
+                    cnt++;
+                }
+            }
+  
+            ans[i - 1] = cnt;
+  
+        }
+        printf("#%d ", tc);
+        for (i = 1; i <= Q; i++) printf("%d ", ans[i]);
+        printf("\n");
+  
+  
+  
+  
+    }
+  
+  
+    return 0;
+}
