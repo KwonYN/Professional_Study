@@ -147,9 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="(중) [기출A-0028] 제품의 일련번호 2.cpp" />
     <ClCompile Include="(중) [사전A-0031] [2019년 10~11월 PRO 검정 사전 테스트] 자율주행 테스트.cpp" />
     <ClCompile Include="(중) [사전A-0033] [2019년 12월 PRO 검정 사전 테스트] 스마트 팩토리.cpp" />
     <ClCompile Include="(중상) [기출P-0046] 직사각형 체인.cpp" />
+    <ClCompile Include="(중상) [모의P-0001] 잠자는 사이에.cpp" />
     <ClCompile Include="(중상) [연습P-0022] LIS 2.cpp" />
     <ClCompile Include="ConsoleApplication1.cpp" />
     <ClCompile Include="[기출P-0007] 팀 구성.cpp" />
