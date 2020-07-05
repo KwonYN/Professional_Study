@@ -1,0 +1,55 @@
+#include <cstdio>
+#include <cmath>
+#include <string>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+
+int T, N;
+string l, r;
+long long fac[20];
+
+long long get_order(string str)
+{
+	long long order = 0;
+	int n = N;
+	char change1[20];
+	for (int j = 0; j < N; j++) change1[j] = 'a' + j;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			if (str[i] == change1[j])
+			{
+				//printf("i = %d, j = %d\n", i, j);
+				order += j * fac[N - i - 1];
+				//printf("order = %d\n", order);
+				for (int k = j + 1; k < n; k++) change1[k - 1] = change1[k];
+				n--;
+				break;
+			}
+		}
+	}
+	//printf("===========\n");
+	return order;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	long long a, b;
+
+	fac[0] = 1;
+	for (int i = 1; i < 18; i++) fac[i] = i * fac[i-1];
+
+	cin >> T;
+	for (int tc = 1; tc <= T; tc++)
+	{
+		cin >> N >> l >> r;
+		a = get_order(r);		b = get_order(l);
+		cout << "#" << tc << " " << (abs(a - b) - 1) << endl;
+	}
+
+	return 0;
+}
