@@ -1,0 +1,63 @@
+// [기출A-0040] 석탑
+/*
+	  [ ]
+	  [ ]
+	h2[ ]f2
+	h1[ ]f1
+	  ... -> 여기까지의 높이의 합 : H
+	  [ ]
+
+	=> 증명 : 
+		H*f1 + (H+h1)*f2 < H*f2 + (H+h2)*f1
+		H*(f1+f2) + h1*f2 < H*(f1+f2) + h2*f1
+		h1*f2 < h2*f1
+		=> h1/f1 < h2/f2
+*/
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(1000)
+
+typedef long long ll;
+struct BRICK { int height, fuel; };
+int T, N;
+BRICK tower[NMAX+5];
+ll result;
+
+bool cmp(BRICK &b1, BRICK &b2) {
+	return ((double)b1.height / b1.fuel) < ((double)b2.height / b2.fuel);
+}
+
+void input() {
+	int h, f;
+	scanf("%d", &N);
+	for (int i = 0; i < N; i++) {
+		scanf("%d %d", &h, &f);
+		tower[i] = { h / 10, f };
+	}
+	//sort(tower, tower + N, cmp);
+}
+
+void get_result() {
+	int sum_height = 0;
+	result = 0LL;
+	for (int i = 0; i < N; i++) {
+		result += (1LL * sum_height * tower[i].fuel);
+		sum_height += tower[i].height;
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, result); }
+
+int main() {
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		get_result();
+		output(tc);
+	}
+	return 0;
+}
+#endif

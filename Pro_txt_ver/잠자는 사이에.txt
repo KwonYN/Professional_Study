@@ -1,0 +1,106 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+    static int parent_list[];
+    static int list[];
+    static int edge[][];
+    static int exc[][];
+ 
+    public static void main(String[] args) throws IOException {
+        // TODO Auto-generated method stub
+ 
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+ 
+        int T = Integer.parseInt(st.nextToken());
+ 
+        for (int i = 1; i <= T; i++) {
+            st = new StringTokenizer(br.readLine());
+            int N = Integer.parseInt(st.nextToken());
+ 
+            parent_list = new int[N + 1];
+            edge = new int[N + 1][3];
+            exc = new int[3][3];
+            list = new int[N + 1];
+ 
+            int c = 0;
+ 
+            for (int j = 1; j <= N; j++) {
+                st = new StringTokenizer(br.readLine());
+ 
+                int parent = Integer.parseInt(st.nextToken());
+                int child = Integer.parseInt(st.nextToken());
+ 
+                edge[j][1] = parent;
+                edge[j][2] = child;
+ 
+                if (parent_list[child] == 0) { // 부모가 값이 하나인경우
+                    parent_list[child] = parent;
+                } else { // 부모가 2개인 경우
+                    c = child;
+                }
+                list[j] = j;
+            }
+ 
+            int k = 0;
+            bw.append("#" + i + " ");
+ 
+            for (int j = 1; j <= N; j++) {
+            //for (int j = N; j >= 1; j--) {
+                if (edge[j][2] == c) { // 부모인 애들은 UNION에서 제거
+                    k++;
+                    exc[k][1] = edge[j][1];
+                    exc[k][2] = edge[j][2];
+                    continue;
+                }
+                if (find(edge[j][1]) == find(edge[j][2])) { // 같은 그룹이라면 사이클 구성
+                    bw.append(edge[j][1] + " " + edge[j][2]);
+                    break;
+                } else {
+                    union(edge[j][1], edge[j][2]);
+                }
+            }
+            if (c != 0) { // 부모가 2가지 존재하는 경우
+                if (find(exc[1][1]) == find(exc[1][2])) {
+                    bw.append(exc[1][1] + " " + exc[1][2]);
+                } else {
+                    bw.append(exc[2][1] + " " + exc[2][2]);
+                }
+            } else {
+            }
+            bw.append('\n');
+            bw.flush();
+        }
+        bw.close();
+    }
+ 
+    private static int union(int s, int e) {
+        // TODO Auto-generated method stub
+        int a = find(s);
+        int b = find(e);
+        if (a == b) { // 싸이클을 이루는 케이스
+            return 0;
+        }
+        if (a > b) {
+            list[a] = b;
+        } else {
+            list[b] = a;
+        }
+        return 1;
+    }
+ 
+    private static int find(int s) {
+        // TODO Auto-generated method stub
+        if (list[s] == s) {
+            return s;
+        } else {
+            return list[s] = find(list[s]);
+        }
+    }
+} 

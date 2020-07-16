@@ -39,6 +39,21 @@
     <ClCompile Include="(중상) [모의P-0001] 잠자는 사이에.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="(중상) [교육P-0033] 제품의 일련번호 3.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중) [기출A-0040] 석탑.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0067] 가장 큰 최단 경로.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[기출A-0040] 석탑.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0019] 일방통행.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt">

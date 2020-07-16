@@ -541,4 +541,99 @@ int main() {
 	return 0;
 }
 #endif
+// 필요없는 것 다 쳐내보자!
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX	(30000)
+
+int T, N;
+int indegree[NMAX + 5], outdegree[NMAX + 5];
+int two_parent_node;
+pair<int, int> edges[NMAX + 5];
+vector<int> result_idx[NMAX + 5];
+
+void init() {
+	two_parent_node = 0;
+	for (int i = 1; i <= N; i++) {
+		indegree[i] = 0;
+		outdegree[i] = 0;
+		result_idx[i].clear();
+	}
+}
+
+void input_operation() {
+	int s, e;
+	scanf("%d", &N);
+	init();
+	for (int i = 0; i < N; i++) {
+		scanf("%d %d", &s, &e);
+		edges[i] = { s, e };
+		if (++indegree[e] > 1) {
+			two_parent_node = e;
+		}
+		outdegree[s]++;
+		result_idx[e].push_back(s);
+	}
+}
+
+bool find_circulation(int start_node, int cir_node) {
+	queue<int> que;
+	que.push(start_node);
+	while (!que.empty()) {
+		int node = que.front();		que.pop();
+		for (int next : result_idx[node]) {
+			if (next == cir_node) return true;
+			que.push(next);
+		}
+	}
+	return false;
+}
+
+void output(int tc) {
+	bool end_flag = true;
+	printf("#%d ", tc);
+	if (two_parent_node) {
+		for (int i = result_idx[two_parent_node].size() - 1; i >= 0; i--) { // 최대 2번 돔
+			if (find_circulation(result_idx[two_parent_node][i], two_parent_node)) {
+				end_flag = false;
+				printf("%d %d\n", result_idx[two_parent_node][i], two_parent_node);
+				break;
+			}
+		}
+		if (end_flag) {
+			for (int i = result_idx[two_parent_node].size() - 1; i >= 0; i--) {	// 최대 2번
+				if (indegree[result_idx[two_parent_node][i]] == 0
+					&& outdegree[result_idx[two_parent_node][i]] <= 1) {
+					continue;
+				}
+				printf("%d %d\n", result_idx[two_parent_node][i], two_parent_node);
+				break;
+			}
+		}
+	}
+	else {
+		for (int i = N - 1; i >= 0; i--) { // 최대 N번
+			if (outdegree[edges[i].first] >= 1) {
+				printf("%d %d\n", edges[i].first, edges[i].second);
+				break;
+			}
+		}
+	}
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input_operation();
+		output(tc);
+	}
+	return 0;
+}
+#endif
 
