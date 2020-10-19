@@ -1,0 +1,273 @@
+// 1
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+ 
+    static int[][] direction = new int[][] { { 0, 0 }, { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+ 
+    public static void main(String[] args) throws NumberFormatException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+         
+          int times = Integer.parseInt(br.readLine().trim()); 
+          for (int t = 1; t < times+1; t++) {
+          
+        StringTokenizer st = new StringTokenizer(br.readLine().trim());
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
+        int r = Integer.parseInt(st.nextToken());
+        int c = Integer.parseInt(st.nextToken());
+        int hours = Integer.parseInt(st.nextToken());
+  
+        int[][] map = new int[n][m];
+        int[][] tempMap = new int[n][m];
+  
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(br.readLine().trim());
+            for (int j = 0; j < m; j++) {
+                map[i][j] = Integer.parseInt(st.nextToken());
+            }
+        }
+        /////////////////////////////////////////////////////////////////////////
+  
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[] { r, c, 1 }); // i,j,hour
+        tempMap[r][c] = 1;
+  
+        int temp[] = null;
+        int newi = 0;
+        int newj = 0;
+        int hour = 0;
+        int totalCnt = 1;
+        int depth = 0;
+        boolean possibility = false;
+        int currentPipe = 0;
+        int nextPipe = 0;
+  
+        while (!queue.isEmpty()) {
+   
+            temp = queue.poll();
+            hour = temp[2];
+  
+            if (hour == hours) {
+                break;
+            }
+  
+            depth = tempMap[temp[0]][temp[1]];
+            currentPipe = map[temp[0]][temp[1]];
+  
+            for (int i = 1; i < 5; i++) {
+                newi = temp[0] + direction[i][0];
+                newj = temp[1] + direction[i][1];
+                if (newi >= 0 && newi < n && newj >= 0 && newj < m) {
+                    nextPipe = map[newi][newj];
+                    possibility = dispatch(i, currentPipe, nextPipe);
+                    if (tempMap[newi][newj] == 0 && map[newi][newj] != 0 && possibility) {
+                        tempMap[newi][newj] = depth + 1;
+                        totalCnt++;
+                        queue.offer(new int[] { newi, newj, hour + 1 });
+  
+                    }
+                }
+            }
+  
+        }
+         
+        System.out.println("#"+t+" "+totalCnt);
+    }
+ 
+    }
+ 
+    public static boolean dispatch(int direction, int currentPipe, int nextPipe) {
+        switch (currentPipe) {
+        case 1:
+            break;
+        case 2:
+            if (direction == 3 || direction == 4) {
+                return false;
+            } else
+                break;
+        case 3:
+            if (direction == 1 || direction == 2) {
+                return false;
+            } else
+                break;
+        case 4:
+            if (direction == 2 || direction == 3) {
+                return false;
+            } else
+                break;
+        case 5:
+            if (direction == 1 || direction == 3) {
+                return false;
+            } else
+                break;
+        case 6:
+            if (direction == 1 || direction == 4) {
+                return false;
+            } else
+                break;
+        case 7:
+            if (direction == 2 || direction == 4) {
+                return false;
+            } else
+                break;
+        }
+ 
+        switch (direction) {
+        case 1:
+            if (nextPipe == 3 || nextPipe == 4 || nextPipe == 7) {
+                return false;
+            } else
+                return true;
+        case 2:
+            if (nextPipe == 3 || nextPipe == 5 || nextPipe == 6) {
+                return false;
+            } else
+                return true;
+        case 3:
+            if (nextPipe == 2 || nextPipe == 6 || nextPipe == 7) {
+                return false;
+            } else
+                return true;
+        case 4:
+            if (nextPipe == 2 || nextPipe == 4 || nextPipe == 5) {
+                return false;
+            } else
+                return true;
+        }
+        return false;
+    }
+ 
+}
+
+
+// 2
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.io.IOException;
+ 
+public class Solution {
+     
+    static int N, M, R, C, L;
+    static int[][] map, visit;
+    static int[] dy = {1, -1, 0, 0};
+    static int[] dx = {0, 0, 1, -1};
+    static int[][] type = {{0, 0, 0, 0}, {1, 1, 1, 1}, {1, 1, 0, 0}, {0, 0, 1, 1}, 
+            {1, 0, 0, 1}, {0, 1, 0, 1}, {0, 1, 1, 0}, {1, 0, 1, 0}};
+     
+    static class Pair {
+        int y, x, level;
+        Pair(int y, int x, int level) {
+            this.y = y;
+            this.x = x;
+            this.level = level;
+        }
+    }
+ 
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine()), test = 0;
+         
+        while(test++ < T) {
+            String[] input = br.readLine().split(" ");
+            N = Integer.parseInt(input[0]);
+            M = Integer.parseInt(input[1]);
+            R = Integer.parseInt(input[2]);
+            C = Integer.parseInt(input[3]);
+            L = Integer.parseInt(input[4]);
+             
+            map = new int[N][M];
+            visit = new int[N][M];
+             
+            for(int i=0; i<N; i++) {
+                String input1[] = br.readLine().split(" "); 
+                for(int j=0; j<M; j++) {
+                    map[i][j] = Integer.parseInt(input1[j]);
+                }
+            }
+             
+            int answer = bfs(R, C, L);
+            System.out.println("#"+test+" "+answer);
+        }
+    }
+     
+    public static int bfs(int y, int x, int time) {
+        Queue<Pair> q = new LinkedList<Pair>();
+        q.add(new Pair(y, x, 1));
+        visit[y][x] = 1;
+        int cnt = 1;
+ 
+        while(!q.isEmpty()) {
+             
+            Pair pair = q.poll();
+            int Y = pair.y;
+            int X = pair.x;
+            int t = map[Y][X];
+             
+            if(pair.level >= time)
+                break;
+             
+            if(type[t][0] == 1) {
+                int nextY = Y-1;
+                int nextX = X;
+                if(nextY>=0 && nextX>=0 && nextY<N && nextX<M) {
+                    if(visit[nextY][nextX]==0) {
+                        if(map[nextY][nextX]==1 || map[nextY][nextX]==2 || map[nextY][nextX]==5 || map[nextY][nextX]==6) {
+                            q.add(new Pair(nextY, nextX, pair.level+1));
+                            visit[nextY][nextX] = 1;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            if(type[t][1] == 1) {
+                int nextY = Y+1;
+                int nextX = X;
+                if(nextY>=0 && nextX>=0 && nextY<N && nextX<M) {
+                    if(visit[nextY][nextX]==0) {
+                        if(map[nextY][nextX]==1 || map[nextY][nextX]==2 || map[nextY][nextX]==4 || map[nextY][nextX]==7) {
+                            q.add(new Pair(nextY, nextX, pair.level+1));
+                            visit[nextY][nextX] = 1;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            if(type[t][2] == 1) {
+                int nextY = Y;
+                int nextX = X-1;
+                if(nextY>=0 && nextX>=0 && nextY<N && nextX<M) {
+                    if(visit[nextY][nextX]==0) {
+                        if(map[nextY][nextX]==1 || map[nextY][nextX]==3 || map[nextY][nextX]==4 || map[nextY][nextX]==5) {
+                            q.add(new Pair(nextY, nextX, pair.level+1));
+                            visit[nextY][nextX] = 1;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            if(type[t][3] == 1) {
+                int nextY = Y;
+                int nextX = X+1;
+                if(nextY>=0 && nextX>=0 && nextY<N && nextX<M) {
+                    if(visit[nextY][nextX]==0) {
+                        if(map[nextY][nextX]==1 || map[nextY][nextX]==3 || map[nextY][nextX]==6 || map[nextY][nextX]==7) {
+                            q.add(new Pair(nextY, nextX, pair.level+1));
+                            visit[nextY][nextX] = 1;
+                            cnt++;
+                        }
+                    }
+                }
+            }
+        }
+        return cnt;
+    }
+}

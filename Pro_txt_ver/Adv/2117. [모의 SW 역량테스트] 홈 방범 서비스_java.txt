@@ -1,0 +1,183 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
+ 
+/**
+ * SWEA 2117 [모의] 홈 방범 서비스
+ */
+public class Solution {
+    static class Point{
+        int r,c;
+        Point(int r, int c ){
+            this.r = r;
+            this.c = c;
+        }
+    }
+    static int N, M, map[][], cost[][][], MAX;
+    static int[] operCost;
+    public static void main(String[] args) throws NumberFormatException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer tk;
+        operCost = new int[22];
+        for(int i=1; i<22; i++) {
+            operCost[i] = i*i+(i-1)*(i-1);
+        }       
+        int T = Integer.parseInt(br.readLine());
+        ////tc
+        for(int tc = 1; tc<=T ;tc++) {
+            tk = new StringTokenizer(br.readLine());
+            N = Integer.parseInt(tk.nextToken());
+            M = Integer.parseInt(tk.nextToken());
+             
+            MAX = 0;
+            map = new int[N][N];
+            cost = new int[N][N][N+2];
+             
+            for(int i=0; i<N; i++) {
+                tk = new StringTokenizer(br.readLine());
+                for(int j=0; j<N; j++) {
+                    map[i][j] = Integer.parseInt(tk.nextToken());
+                }
+            }//input
+             
+            //1.모든칸 돌면서
+            for(int i=0; i<N; i++) {
+                for(int j=0; j<N; j++) {
+                    //2.K가 1~N일때 가격 구하기
+                    bfs(i,j);
+                }
+            }
+             
+            //ouput
+            System.out.println("#"+tc+" "+MAX);
+        }//tc
+         
+    }//main
+     
+    static int[] dR = {-1,0,1,0};
+    static int[] dC = {0,1,0,-1};
+    private static void bfs(int r, int c) {
+        Queue<Point> que = new LinkedList<Point>();
+        boolean[][] visited = new boolean[N][N];
+        int level=1, sum =0;
+         
+        visited[r][c] = true;
+        que.offer(new Point(r,c));
+         
+        while(!que.isEmpty() && level<N+2) {
+            int levelSize = que.size();
+             
+            while(levelSize-- > 0) {
+                Point p = que.poll();
+                //지금 범위에 집 있으면  sum++;
+                if(map[p.r][p.c]==1) {
+                    sum++;
+                }
+                 
+                //다음 범위에 있을 범위 큐에 넣기
+                for(int d=0; d<4; d++) {
+                    int nr = p.r+dR[d];
+                    int nc = p.c+dC[d];
+                    if(nr<0 || nr>=N || nc<0 || nc>=N || visited[nr][nc]) continue; //범위 초과 || 이미 방문
+                 
+                    visited[nr][nc] = true;
+                    que.offer(new Point(nr,nc));
+                }
+                 
+            }//level
+             
+            cost[r][c][level]=sum;
+            //손해 안볼때
+            if(sum*M >= operCost[level]) {
+                MAX = Math.max(MAX, sum);
+            }
+             
+            level++;
+        }//que
+    }//bfs
+ 
+}
+
+
+// 2
+import java.io.*;
+import java.util.*;
+                 
+public class Solution {
+ 
+    private static class Node {
+        int x, y;
+ 
+        Node(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+ 
+    static ArrayList<Node> list;
+    static int size, profit;
+    static int[] cost = new int[41];
+    static int result;
+    static StringBuilder sb = new StringBuilder();
+ 
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+ 
+        int tnum = stoi(st.nextToken());
+ 
+        for (int i = 1; i < 41; i++) {
+            cost[i] = i * i + (i - 1) * (i - 1);
+        }
+ 
+        for (int t = 1; t <= tnum; t++) {
+            st = new StringTokenizer(br.readLine());
+            size = stoi(st.nextToken());
+            profit = stoi(st.nextToken());
+            list = new ArrayList<>();
+            result = 0;
+ 
+            for (int i = 0; i < size; i++) {
+                st = new StringTokenizer(br.readLine());
+                for (int j = 0; j < size; j++) {
+                    if (stoi(st.nextToken()) == 1) {
+                        list.add(new Node(i, j));
+                    }
+                }
+            }
+            calc();
+            sb.append("#" + t + " " + result + "\n");
+        }
+        System.out.println(sb.toString());
+    }
+ 
+    private static void calc() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                int[] temp = new int[size + size];
+                distance(temp, i, j);
+ 
+                int sum = 0;
+                for (int k = 0; k < size + size; k++) {
+                    sum += temp[k];
+                    if (sum * profit >= cost[k + 1] && sum > result) {
+                        result = sum;
+                    }
+                }
+            }
+        }
+    }
+ 
+    private static void distance(int[] temp, int x, int y) {
+        for (int i = 0; i < list.size(); i++) {
+            temp[Math.abs(list.get(i).x - x) + Math.abs(list.get(i).y - y)]++;
+        }
+    }
+ 
+    private static int stoi(String input) {
+        return Integer.parseInt(input);
+    }
+}

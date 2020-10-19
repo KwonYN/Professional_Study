@@ -1,0 +1,480 @@
+// (중상) [기출P-0013] 우범지역
+/*
+	교차로는 Tree 형태로 연결되어 있다!!!(조건)
+*/
+
+// Wow!!!!!
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100010)
+#define KMAX	(105)
+#define ROOT	(1)
+
+typedef long long ll;
+int T, N, K;
+vector<int> edges[NMAX];
+int isCrime[NMAX];
+ll dp1[NMAX][KMAX], dp2[NMAX][KMAX];
+
+void init() {
+	for(int i = 1; i <= N; i++) {
+		edges[i].clear();
+	}
+}
+
+void input() {
+	int a, b;
+	scanf("%d %d", &N, &K);
+	init();
+	for(int i = 1; i < N; i++) {
+		scanf("%d %d", &a, &b);
+		edges[a].push_back(b);
+		edges[b].push_back(a);
+	}
+	for(int i = 1; i <= N; i++) {
+		scanf("%d", &isCrime[i]);
+	}
+}
+
+void dfs(int node, int parent) {	// 1이 Root인 Tree 기준, 자식들의 우범지역 카운드
+	for(int i = 0; i <= K; i++) {
+		dp1[node][i] = 1LL*isCrime[node];
+		dp2[node][i] = 0LL;	// init
+	}
+	for(int child : edges[node]) {
+		if(child == parent) continue;
+		dfs(child, node);
+		for(int i = 1; i <= K; i++) {
+			dp1[node][i] += dp1[child][i-1];
+		}
+	}
+}
+
+void reverse_dfs(int node, int parent) {	// 자식 아닌 노드들의 우범지역 카운트
+	for(int child : edges[node]) {
+		if(child == parent) continue;
+		for(int i = 1; i <= K; i++) {
+			dp2[child][i] += (dp2[node][i-1] + dp1[node][i-1]);
+			if(i >= 2) {
+				dp2[child][i] -= dp1[child][i-2];
+			}
+		}
+		reverse_dfs(child, node);
+	}
+}
+
+void output(int tc) {
+	ll ans = 0LL;
+    for(int i = 1; i <= N; i++) {
+        ans += (dp1[i][K] + dp2[i][K]);
+        //printf("dp1[%d][%d] : %lld, dp2[%d][%d] : %lld\n", i, K, dp1[i][K], i, K, dp2[i][K]);
+    }
+    /*
+    printf("dp2\n");
+    for(int i = 0; i <= K; i++) {
+        printf("[%d] ", i);
+        for(int j = 1; j <= N; j++) {
+         printf("%lld ", dp2[j][i]);
+        }
+        printf("\n");
+    }
+    printf("\n\ndp1\n");
+    for(int i = 0; i <= K; i++) {
+        printf("[%d] ", i);
+        for(int j = 1; j <= N; j++) {
+         printf("%lld ", dp1[j][i]);
+        }
+        printf("\n");
+    }
+	*/
+	printf("#%d %lld\n", tc, ans);
+}
+
+int main() {
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		input();
+		dfs(ROOT, 0);
+		reverse_dfs(ROOT, 0);
+		output(tc);
+	}
+	return 0;
+}
+#endif
+
+// dfs로 하니까 시간이 너무 크게 나옴. for문으로 대체할 수는 없을까?
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100010)
+#define KMAX	(105)
+#define ROOT	(1)
+
+typedef long long ll;		// 10만*10만까지 나올 수 있음
+int T, N, K, isCrime[NMAX];
+vector<int> edges[NMAX];
+ll dp[NMAX][KMAX];
+
+void init() {
+	for(int i = 1; i <= N; i++) {
+		edges[i].clear();
+		for(int j = 0; j <= K; j++) dp[i][j] = 0LL;
+	}
+}
+
+void input() {
+	int a, b;
+	scanf("%d %d", &N, &K);
+	init();
+	for(int i = 1; i < N; i++) {
+		scanf("%d %d", &a, &b);
+		edges[a].push_back(b);
+		edges[b].push_back(a);
+	}
+	for(int i = 1; i <= N; i++) {
+		scanf("%d", &isCrime[i]);
+		dp[i][0] = 1LL*isCrime[i]; // init
+	}
+}
+
+void get_dp() {
+	if(K == 0) return;
+	// K == 1일 때
+	for(int i = 1; i <= N; i++) {
+		for(int next : edges[i]) {
+			dp[i][1] += dp[next][0];
+		}
+        dp[i][1] += dp[i][0];
+	}
+	// K >= 2일 때 : tree특징 + dfs로 풀었을 때, K >= 2일 때부터 부모 노드의 자식 노드들 중 나를 제외한 다른 자식 노드들에 연결된 것까지 신경써줘야 함!
+	for(int i = 2; i <= K; i++) {
+		for(int j = 1; j <= N; j++) {
+            ll total = 0LL;
+			for(int next : edges[j]) {
+                total += dp[next][i-1];
+			}
+            dp[j][i] = total - dp[j][i-2]*(edges[j].size()-1); // tree구조임을 잊지 말자! (직접 그려볼 것)
+		}
+	}
+}
+
+void output(int tc) {
+	ll ans = 0LL;
+    for(int i = 1; i <= N; i++) {
+        ans += dp[i][K];
+        /*
+        printf("[%d node] : ", i);
+        for(int j = 0; j <= K; j++) {
+			printf("%lld ", dp[i][j]);   
+        }
+        printf("\n");
+        */
+    }
+	printf("#%d %lld\n", tc, ans);
+}
+
+int main() {
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		input();
+		get_dp();
+		output(tc);
+	}
+	return 0;
+}
+#endif
+
+
+// KDA 프로님 ver.
+#if 0
+#include <ctime>
+#include <cstdio>
+#include <vector>
+#include <deque>
+ 
+int N, K; // 교차로개수, 거리
+int C[100001]; // 범죄자 존재 여부
+int D[100001][101]; // [i][j] : i번 정점기준 거리 j 이내에서의 범죄자 명수
+long long Answer;
+ 
+int Parent[100001];
+ 
+std::vector<int> AL[100001];
+std::deque<int> Q;
+ 
+void DFS(int curr) {
+    for (int k = 0; k <= K; k++) {
+        D[curr][k] = C[curr];
+    }
+    for (int n : AL[curr]) {
+        if (Parent[n] == 0) {
+            Parent[n] = curr;
+            DFS(n);
+            for (int k = 1; k <= K; k++) {
+                D[curr][k] += D[n][k - 1];
+            }
+        }
+    }
+}
+ 
+int main() {
+    int T;
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        scanf("%d %d", &N, &K);
+        for (int i = 1; i <= N; i++) {
+            AL[i].clear();
+            Parent[i] = 0;
+        }
+        for (int i = 1; i < N; i++) {
+            int a, b;
+            scanf("%d %d", &a, &b);
+            AL[a].push_back(b);
+            AL[b].push_back(a);
+        }
+        for (int i = 1; i <= N; i++) {
+            scanf("%d", &C[i]);
+        }
+        for (int i = 0; i <= N; i++) {
+            for (int j = 0; j <= K; j++) {
+                D[i][j] = 0;
+            }
+        }
+ 
+        // processing
+        Answer = 0ll;
+        Parent[1] = -1;
+        // 임의의 노드를 root 로 둔다.
+        DFS(1);
+ 
+        // Parent 처리
+        Q.clear();
+        Q.push_back(1);
+        while (!Q.empty()) {
+            int curr = Q.front();
+            Q.pop_front();
+            if (curr != 1) {
+//              D[curr][1] += D[Parent[curr]][0];
+//              for (int k = 2; k <= K; k++) {
+                for (int k = K; k > 1 ; k--) {
+                    D[curr][k] += D[Parent[curr]][k - 1] - D[curr][k - 2];
+                }
+                D[curr][1] += D[Parent[curr]][0];
+            }
+            for (int n : AL[curr]) {
+                if (Parent[n] == curr) {
+                    Q.push_back(n);
+                }
+            }
+        }
+ 
+        for (int i = 1; i <= N; i++) {
+            Answer += D[i][K];
+        }
+        printf("#%d %lld\n", tc, Answer);
+    }
+//  printf("Time : %.3f sec\n", (double)clock() / CLOCKS_PER_SEC);
+    return 0;
+}
+#endif
+
+// 준과윤 프로님 ver.
+#if 0
+/*
+교차로 어떤 위치 j에서의 i범위내의 합을 dp[i][j] 라고 정의 한다면
+점화식은 dp[i][j] = sum(dp[i - 1][j에 연결된 모든 노드들]) - (연결된 노드수 * dp[i - 2][j]) + dp[i - 2][j];
+*/
+#include <iostream>
+#include <cstdio>
+#include <vector>
+using namespace std;
+#define maxn 100002
+#define maxk 102
+int dp[maxk][maxn]; //dp[K범위][N:교차로]의 법죄자의 합.
+vector<int>edge[maxn];
+int N, K;
+int main(){
+    int T; scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++){
+        scanf("%d%d", &N, &K);
+        for (int i = 1; i <= N; i++) edge[i].clear();
+        for (int i = 1; i < N; i++){
+            int a, b; scanf("%d%d", &a, &b);
+            edge[a].push_back(b);
+            edge[b].push_back(a);
+        }
+        for (int i = 1; i <= N; i++){
+            scanf("%d", &dp[0][i]); //입력값 자체가, K=0범위의 범죄자 개수가 됨.
+        }
+        if (K > 0){
+            //dp[1][j] case : j에 연결된 모든 노드의 범죄자 + 현재 j노드의 범죄자 수 합.          
+            for (int j = 1; j <= N; j++){ //node
+                int sum = 0;
+                for (auto it : edge[j]){
+                    sum += dp[0][it];
+                }
+                dp[1][j] = sum + dp[0][j];
+            }
+            //dp[2~K][j] case.
+            for (int i = 2; i <= K; i++){
+                for (int j = 1; j <= N; j++){
+                    int sum = 0;
+                    for (auto it : edge[j]){
+                        sum += dp[i - 1][it];
+                    }
+                    dp[i][j] = sum - (edge[j].size()*dp[i - 2][j]) + dp[i - 2][j];
+                }
+            }
+        }
+        //else //K ==0 이면, 입력받은 dp[0][1 ~ N] 값을 누적하면 범죄자 총합이된다.
+        long long ans = 0;
+        for (int i = 1; i <= N; i++){
+            ans += dp[K][i];
+        }
+        printf("#%d %lld\n", tc, ans);
+    }
+    return 0;
+}
+#endif
+
+// O.Ov 프로님 ver.
+#if 0
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include <vector>
+#include <cstring>
+#include <queue>
+using namespace std;
+ 
+#define MAX_N 100000
+#define MAX_K 100
+int T, N, K;
+int a, b;
+vector<vector<int> > V;
+int D[MAX_K + 1][MAX_N + 1];
+ 
+int main() {
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++) {
+        scanf("%d %d", &N, &K);
+         
+        for (int i = 1; i <= K; i++) {
+            for (int j = 1; j <= N; j++) {
+                D[i][j] = 0;
+            }
+        }
+        V.clear();
+        V.resize(N + 1);
+         
+        for (int i = 0; i < N - 1; i++) {
+            scanf("%d %d", &a, &b);     
+            V[a].push_back(b);
+            V[b].push_back(a);
+        }
+         
+        for (int i = 1; i <= N; i++) {
+            scanf("%d", &D[0][i]);
+        }
+         
+        for (int i = 1; i <= K; i++) {
+            for (int j = 1; j <= N; j++) {
+                int sumV = 0;
+                for (int k = 0; k < V[j].size(); k++) {
+                    sumV += D[i - 1][V[j][k]];
+                }
+                 
+                if (i == 1) {
+                    sumV += D[i - 1][j];    
+                } else if (i >= 2) {
+                    if (V[j].size() > 1) {
+                        sumV -= (V[j].size() - 1) * D[i - 2][j];
+                    }
+                }
+                D[i][j] = sumV;
+            }
+        }
+ 
+        long long ans = 0;
+        for (int i = 1; i <= N; i++) {
+            ans += D[K][i];
+        }
+         
+        printf("#%d %lld\n", tc, ans);
+    }
+    return 0;
+ 
+}
+#endif
+
+// 처음 실패 ver.
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100010)
+#define KMAX	(105)
+#define ROOT_NUM (1)
+
+int T, N, K;
+vector<int> edges[NMAX];
+bool isCriminal[NMAX];
+int numbering[NMAX], depth[NMAX], num;
+int child[NMAX][KMAX];
+
+void init() {
+	for(int i = 1; i <= N; i++) {
+		edges[i].clear();
+		isCriminal[i] = false;
+		for(int j = 0; j <= K; j++) child[i][j] = 0;
+	}
+	num = 0;
+}
+
+void input() {
+	int a, b;
+	scanf("%d %d", &N, &K);
+	init();
+	for(int i = 1; i <= N; i++) {
+		scanf("%d %d", &a, &b);
+		edges[a].push_back(b);
+		edges[b].push_back(a);
+	}
+	for(int i = 1; i <= N; i++) {
+		scanf("%d", &a);
+		if(a) isCriminal[i] = true;
+	}
+}
+
+void dfs_depth(int node, int parent, int d) {
+	numbering[node] = ++num;
+	depth[numbering[node]] = d;
+	for(int n : edges[node]) {
+		if(n == parent) continue;
+		dfs_depth(n, node, d+1);
+	}
+}
+
+int main() {
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		input();
+		dfs_depth(ROOT_NUM, ROOT_NUM, 0);
+		/*for(int i = 1; i <= N; i++) {
+			printf("[%d] %d %d\n", i, numbering[i], depth[numbering[i]]);
+		}*/
+	}
+	return 0;
+}
+#endif
+

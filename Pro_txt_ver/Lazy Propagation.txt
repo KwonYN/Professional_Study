@@ -1,0 +1,134 @@
+// 세그먼트 트리 Lazy Propagation?
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <cassert>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100010)
+
+typedef long long ll;
+struct SHOP { int inventory_code[4], lazy[4]; };
+int T, N, Q;
+SHOP inventory[NMAX * 3];	// 세그먼트트리
+ll tree[NMAX + 5];		// 펜윅트리
+ll acc_sales;
+
+void init_inventory(int s, int e, int idx) {
+	for (int i = 0; i <= 3; i++) {
+		inventory[idx].inventory_code[i] = 0;
+		inventory[idx].lazy[i] = 0;
+	}
+	if (s == e) return;
+	int m = (s + e) / 2;
+	init_inventory(s, m, idx << 1);
+	init_inventory(m + 1, e, (idx << 1) | 1);
+}
+
+void init() {
+	acc_sales = 0LL;
+	for (int i = 0; i <= N; i++) {
+		tree[i] = 0LL;
+	}
+	init_inventory(1, N, 1);
+}
+
+void lazy_propagation(int s, int e, int idx, int code) {
+	if (inventory[idx].lazy[code] != 0) {
+		inventory[idx].inventory_code[code] += inventory[idx].lazy[code] * (e - s + 1);
+		if (s != e) {
+			inventory[idx << 1].lazy[code] += inventory[idx].lazy[code];
+			inventory[(idx << 1) | 1].lazy[code] += inventory[idx].lazy[code];
+		}
+		inventory[idx].lazy[code] = 0;
+	}
+}
+
+void update(int s, int e, int l, int r, int idx, int code, int val) {
+	assert(1 <= s && e <= N);
+	lazy_propagation(s, e, idx, code);
+	if (e < l || r < s) return;
+	if (l <= s && e <= r) {
+		inventory[idx].inventory_code[code] += (e - s + 1) * val;
+		if (s != e) {
+			inventory[idx << 1].lazy[code] += val;
+			inventory[(idx << 1) | 1].lazy[code] += val;
+		}
+		return;
+	}
+	int m = (s + e) / 2;
+	update(s, m, l, r, idx << 1, code, val);
+	update(m + 1, e, l, r, (idx << 1) | 1, code, val);
+	inventory[idx].inventory_code[code] =
+		inventory[idx << 1].inventory_code[code]
+		+ inventory[(idx << 1) | 1].inventory_code[code];
+}
+
+void update_fenwick(int idx, ll val) {
+	while (idx <= N) {
+		tree[idx] += val;
+		idx += idx & -idx;
+	}
+}
+
+void inventory_sales(int s, int e, int shop, int idx, int cnt) {
+	for (int i = 1; i <= 3; i++) lazy_propagation(s, e, idx, i);
+	if (shop < s || e < shop) return;
+	if (s == e) {
+		int val = cnt;
+		for (int i = 1; i <= 3; i++) {
+			val = min(val, inventory[idx].inventory_code[i]);
+		}
+		for (int i = 1; i <= 3; i++) {
+			inventory[idx].inventory_code[i] -= val;
+		}
+		update_fenwick(s, 1LL * val);
+		return;
+	}
+	int m = (s + e) / 2;
+	inventory_sales(s, m, shop, idx << 1, cnt);
+	inventory_sales(m + 1, e, shop, (idx << 1) | 1, cnt);
+}
+
+ll get_sum(int idx) {
+	ll sum = 0LL;
+	while (idx) {
+		sum += tree[idx];
+		idx -= idx & -idx;
+	}
+	return sum;
+}
+
+void input_() {
+	int cmd, left, right, commodity, count;
+	scanf("%d %d", &N, &Q);
+	init();
+	for (int i = 1; i <= Q; i++) {
+		scanf("%d", &cmd);
+		if (cmd == 1) {	// 납품
+			scanf("%d %d %d %d", &left, &right, &commodity, &count);
+			update(1, N, left, right, 1, commodity, count);
+		}
+		else if (cmd == 2) {	// 판매
+			scanf("%d %d", &left, &count);
+			inventory_sales(1, N, left, 1, count);
+		}
+		else {	// 판매수량 조사
+			scanf("%d %d", &left, &right);
+			acc_sales += (get_sum(right) - get_sum(left - 1));
+		}
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, acc_sales); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input_();
+		output(tc);
+	}
+	return 0;
+}
+#endif

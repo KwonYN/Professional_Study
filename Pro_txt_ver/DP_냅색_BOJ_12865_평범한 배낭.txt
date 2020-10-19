@@ -1,0 +1,45 @@
+// BOJ_12865_평범한 배낭
+/*
+	dp[i][j] : 무게 제한(K) i
+			   j번째 물건을 판단
+*/
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100)
+#define KMAX	(100000)
+
+int N, K;
+int W[NMAX+5], V[NMAX+5];
+int dp[KMAX+5][NMAX+5];
+
+void input() {
+	scanf("%d %d", &N, &K);
+	for (int i = 1; i <= N; i++) {
+		scanf("%d %d", &W[i], &V[i]);
+		dp[0][i] = 0;
+	}
+	for (int i = 1; i <= K; i++) dp[i][0] = 0;
+}
+
+void operation() {
+	for (int i = 1; i <= K; i++) {
+		for (int j = 1; j <= N; j++) {
+			if (i >= W[j]) dp[i][j] = max(dp[i][j-1], dp[i-W[j]][j-1] + V[j]);
+			else dp[i][j] = dp[i][j-1];
+		}
+	}
+}
+
+void output() { printf("%d\n", dp[K][N]); }
+
+int main() {
+	//freopen("in.txt", "r", stdin);
+	input();
+	operation();
+	output();
+	return 0;
+}
+#endif

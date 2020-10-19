@@ -1,0 +1,244 @@
+// 5653. [모의 SW 역량테스트] 줄기세포배양
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <queue>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define MAP_MAX	(350+10)// N, M 최대 50, 세포는 최대 150만큼 갈 수 있음
+
+struct NODE { int y, x; };
+struct CELL { NODE node; int real_hp, active_hp; };
+int T, N, M, K;
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 }; // 상하좌우
+bool map[MAP_MAX+5][MAP_MAX+5];
+int y_min, x_min,  y_max, x_max;
+queue<CELL> cell;
+int chk[MAP_MAX+5][MAP_MAX+5];
+
+void init() {
+	for (int i = y_min; i <= y_max; i++) {
+		for (int j = x_min; j <= x_max; j++) {
+			map[i][j] = false;
+			chk[i][j] = 0;
+		}
+	}
+	cell = queue<CELL>();	// 초기화
+	//while (!cell.empty()) cell.pop();
+}
+
+void input() {
+	int hp;
+	y_min = x_min = 0x7fffffff;
+	y_max = x_max = -1;
+	scanf("%d %d %d", &N, &M, &K);
+	N += 155, M += 155;
+	for (int i = 155; i < N; i++) {
+		for (int j = 155; j < M; j++) {
+			scanf("%d", &hp);
+			if (hp) {
+				y_min = min(y_min, i);
+				y_max = max(y_max, i);
+				x_min = min(x_min, j);
+				x_max = max(x_max, j);
+				cell.push({ {i, j}, 2 * hp, hp });
+				map[i][j] = true;	// 세포 살아있음
+			}
+		}
+	}
+}
+
+void operation() {
+	int ny, nx, cell_size;
+	vector<NODE> clean;
+	while (K--) {// 최대 300 * 15000이하 < 500만 (테케 총50) < 2.5초
+		clean.clear();	// 초기화
+		cell_size = cell.size();
+		//printf("cell_size=%d\n", cell_size);
+		while (cell_size--) {
+			CELL cur = cell.front();		cell.pop();
+			if (cur.real_hp-- == cur.active_hp) {
+				for (int d = 0; d < 4; d++) {
+					ny = cur.node.y + dy[d];
+					nx = cur.node.x + dx[d];
+					if (map[ny][nx]) continue;
+					if (chk[ny][nx] < cur.active_hp) {
+						if(chk[ny][nx]== 0) clean.push_back({ ny, nx });
+						chk[ny][nx] = cur.active_hp;
+						y_min = min(y_min, ny);
+						y_max = max(y_max, ny);
+						x_min = min(x_min, nx);
+						x_max = max(x_max, nx);
+					}
+				}
+			}
+			if (cur.real_hp) cell.push(cur); // 여전히 살아있음
+		}
+		//printf("[%d] print_node\n", K);
+		for (NODE node : clean) {
+			ny = node.y;	nx = node.x;
+			//printf("ny = %d, nx = %d\n", ny, nx);
+			map[ny][nx] = true;
+			cell.push({ {ny, nx}, 2 * chk[ny][nx], chk[ny][nx] });
+			chk[ny][nx] = 0;
+		}
+	}
+}
+
+void output(int tc) { printf("#%d %d\n", tc, cell.size()); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		operation();
+		output(tc);
+		init();
+	}
+	return 0;
+}
+#endif
+
+
+// 이전 코드
+#if 0
+#include <stdio.h>
+#define MAX	(370)
+
+typedef struct { int y, x, life, total_life, dead_flag; }CELL;
+CELL c[MAX * MAX];
+
+void Input(void);
+void Operation(void);
+void Init_CHK(void);
+void Init_Map(void);
+
+int T, N, M, K;
+int map[MAX][MAX];
+int chk[MAX][MAX];
+int dy[4] = { -1, 1, 0, 0 };
+int dx[4] = { 0, 0, -1, 1 };
+int root_cell;
+int c_cnt;
+int ymax, ymin, xmax, xmin;
+
+int main(void)
+{
+	freopen("in.txt", "r", stdin);
+	int i;
+
+	scanf("%d", &T);
+	for (i = 1; i <= T; i++)
+	{
+		Input();
+		Operation();
+		printf("#%d %d\n", i, root_cell);
+		Init_Map();
+	}
+
+	return 0;
+}
+
+void Input(void)
+{
+	int i, j, tmp;
+
+	ymax = xmax = 0;
+	ymin = xmin = 987654321;
+	c_cnt = root_cell = 0;
+	scanf("%d %d %d", &N, &M, &K);
+	N += 160;		M += 160;
+	for (i = 161; i <= N; i++)
+	{
+		for (j = 161; j <= M; j++)
+		{
+			scanf("%d", &tmp);
+			map[i][j] = tmp;
+			if (tmp > 0)
+			{
+				if (ymax < i) ymax = i;
+				if (ymin > i) ymin = i;
+				if (xmax < j) xmax = j;
+				if (xmin > j) xmin = j;
+				c[++c_cnt] = { i, j, tmp, 2 * tmp, 0 };
+			}
+		}
+	}
+	root_cell = c_cnt;	// root_cell은 총 세포의 개수
+}
+
+void Operation(void)
+{
+	int t, i, d, ny, nx;
+	CELL tmp = { 0, 0, 0, 0, 0 };
+
+	for (t = 1; t <= K; t++)
+	{
+		for (i = 1; i <= c_cnt; i++)
+		{
+			tmp = c[i];
+			if (tmp.dead_flag) continue;
+			if (tmp.total_life-- == tmp.life) // 활성이 되고 첫 1시간
+			{
+				for (d = 0; d < 4; d++)
+				{
+					ny = tmp.y + dy[d];		nx = tmp.x + dx[d];
+					if (map[ny][nx]) continue;
+					if (chk[ny][nx] < tmp.life)
+					{
+						chk[ny][nx] = tmp.life;
+						if (ymax < ny) ymax = ny;
+						if (ymin > ny) ymin = ny;
+						if (xmax < nx) xmax = nx;
+						if (xmin > nx) xmin = nx;
+					}
+				}
+			}
+			if (tmp.total_life == 0)
+			{
+				tmp.dead_flag = 1;
+				root_cell--;
+			}
+			c[i] = tmp;
+		}
+		Init_CHK();
+	}
+}
+
+
+void Init_CHK(void)
+{
+	int i, j, tmp;
+
+	for (i = ymin; i <= ymax; i++)
+	{
+		for (j = xmin; j <= xmax; j++)
+		{
+			tmp = chk[i][j];
+			if (tmp)
+			{
+				map[i][j] = tmp;
+				c[++c_cnt] = { i, j, tmp, 2 * tmp, 0 };
+				root_cell++;
+				chk[i][j] = 0;
+			}
+		}
+	}
+}
+
+void Init_Map(void)
+{
+	int i, j;
+
+	for (i = ymin; i <= ymax; i++)
+	{
+		for (j = xmin; j <= xmax; j++)
+		{
+			map[i][j] = 0;
+			c[i * MAX + j] = { 0, 0, 0, 0, 0 };
+		}
+	}
+}
+#endif

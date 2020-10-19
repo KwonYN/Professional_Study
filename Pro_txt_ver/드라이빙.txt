@@ -1,0 +1,84 @@
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX	(10010)
+#define MMAX	(40010)
+#define INTINF	(0x7fffffff)
+
+typedef long long ll;
+typedef pair<int, pair<int, int>> pipii;
+typedef pair<ll, pair<int, int>> plpii;
+int T, N, M, P, P_2;
+vector<pipii> edges[NMAX];
+pair<ll, int> dijk[NMAX];
+const ll INF = (1LL << 61);
+
+void init() {
+	for (int i = 1; i <= N; i++) {
+		edges[i].clear();
+		dijk[i] = { INF, INTINF };
+	}
+	P_2 = P*2;
+}
+
+void input() {
+	int a, b, c, d;
+	scanf("%d %d %d", &N, &M, &P);
+	init();
+	for (int i = 1; i <= M; i++) {
+		scanf("%d %d %d %d", &a, &b, &c, &d);
+		edges[a].push_back({ c, {b, d} });
+		edges[b].push_back({ c, {a, d} });
+	}
+}
+
+void dijkstra() {
+	priority_queue<plpii, vector<plpii>, greater<plpii>> pq;
+	dijk[1] = { 0LL, 0 };		pq.push({ 0LL, {1, 0} });
+	while (!pq.empty()) {
+		plpii out = pq.top();		pq.pop();
+		int cur = out.second.first;		// 이 노드까지 옴
+		ll dist = out.first;			// 이 노드까지의 누적 시간
+		int climate = out.second.second;// 이 노드에서의 현 날씨 상황
+		if (cur == N) return;
+
+		for (pipii n : edges[cur]) {
+			int isTer = n.second.second;// 1 : 터널, 0 : 일반 도로
+			int d = n.first;			// 그 간선의 길이
+			int next = n.second.first;	// 그 간선에 연결되어 있는 다른 노드
+
+			if (isTer) {	// 터널은 걍 감
+				/*ll chk = dijk[cur].first + 1LL * d;
+				if (dijk[next].first > chk) {
+					dijk[next] = chk;
+					pq.push({ chk, {next, (climate+d)%P_2} });
+				}*/
+			}
+			else {	// 일반 도로라면?
+				int tmp1 = d/P;
+				int tmp2 = d%P;
+				if (!tmp1) {
+					/*if (P - climate >= d) {
+						ll chk = dijk[cur] + 1LL * d;
+					}*/
+				}
+			}
+		}
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n"), tc, dijk[N]; }
+
+int main() {
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		dijkstra();
+		output(tc);
+	}
+}
+#endif

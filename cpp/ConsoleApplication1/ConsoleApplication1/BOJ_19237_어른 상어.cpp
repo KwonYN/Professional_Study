@@ -1,0 +1,198 @@
+// BOJ_19237_어른상어
+/*
+	상어에는 1~M 자연수 번호가 붙어 있고, 모든 번호 서로 다 다름
+	상어들은 다른 상어들을 쫓아내려고 함
+	1번 상어가 제일 셈
+	N*N 격자 중 M개 칸에 상어가 한 마리씩 들어있음
+	맨 처음 상어는 자신의 위치에 자신의 냄새 뿌림
+
+	그 후 1초마다 모든 상어가 동시에 상하좌우 인접 이동 -> 냄새
+	각 상어가 이동방향 결정할 때, 인접 칸 중 아무 냄새 없는 칸으로
+	그런 칸이 없다면 자신의 냄새가 있는 칸으로
+	그런 칸이 또 여러 가지가 있다면 우선순위 있음
+		- 우선순위는 상어마다 다 다를 수 있음
+		- 같은 상어라도 보고있는 방향에 따라 다를 수 있음
+		- 맨 처음 보고 있는 방향은 입력으로 주어짐
+		  그 후 방금 이동한 방향이 보고있는 방향이 됨!
+		- 모든 상어가 이동한 후, 한칸에 여러 마리 상어가 남아있다면 
+		  가장 작은 번호를 가진 상어 제외하고 다 죽음
+*/
+#if 0 // ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <queue>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define NMAX	(20)
+#define MMAX	(NMAX*NMAX)
+#define KMAX	(1000)
+#define TIME_MAX	(1000)
+#define INF		(987654321)
+
+struct NODE { int y, x; };
+struct SHARK { int num;  NODE node; int dir; };
+int N, M, K;
+pair<int, int> sea[NMAX+5][NMAX+5];	// 바다. 테두리 체크 및 냄새 저장. // 냄새, 번호
+queue<NODE> smell;
+queue<SHARK> sharks;
+int dy[5] = { 0, -1, 1, 0, 0 }, dx[5] = { 0, 0, 0, -1, 1 };//X상하좌우
+int shark_first_dir[MMAX+5];	// 상어의 초기 방향
+NODE shark_first_loc[MMAX+5];	// 상어의 초기 위치
+int priority_dir[MMAX+5][5][5]; // 상어의, 각 방향의, 우선순위 방향
+int time_limit;
+bool flag = false;
+
+void input() {
+	int tmp;
+	scanf("%d %d %d", &N, &M, &K);
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+			scanf("%d", &tmp);
+			if (tmp) {
+				shark_first_loc[tmp] = { i, j };
+				sea[i][j] = { K, tmp };
+				smell.push({ i, j });
+			}
+			else sea[i][j] = { 0, 0 };
+		}
+		sea[i][0] = sea[i][N + 1] = sea[0][i] = sea[N + 1][i] = { -1, -1 };	// 테두리
+	}
+	for (int i = 1; i <= M; i++) {
+		scanf("%d", &shark_first_dir[i]);
+	}
+	for (int i = 1; i <= M; i++) {
+		for (int d = 1; d <= 4; d++) {//i번 상어의 상하좌우
+			for (int pd = 1; pd <= 4; pd++) {// d방향의 우선순위
+				scanf("%d", &priority_dir[i][d][pd]);
+			}
+		}
+		sharks.push({ i, shark_first_loc[i], shark_first_dir[i] });
+	}
+}
+
+void print_smell(int t) {
+	printf("[time : %d]\n", t);
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+			printf("%d(%d)< ", sea[i][j].first, sea[i][j].second);
+		}
+		printf("\n");
+	}
+}
+
+void sharks_move() {
+	vector<pair<pair<NODE, int>, bool>> clean;	// 좌표, 방향
+	int chk[NMAX+5][NMAX+5];	// 상어 있는지 없는지?, 작은 번호의 상어 저장
+	// 이동 시에 chk에 기록
+
+	for (int i = 1; i <= N; i++) {
+		//memset(chk[i], INF, sizeof(int) * (N+1));
+		for (int j = 1; j <= N; j++) {
+			chk[i][j] = INF;
+			//printf("%d ", chk[i][j]);
+		}
+		//printf("\n");
+	}
+
+	int sy, sx, sd, ny, nx, nd, sharks_size, smell_size;
+	bool isSmelled;
+	time_limit = 0;
+	while (true) {
+		sharks_size = sharks.size();
+		if (time_limit > TIME_MAX && sharks_size > 1) {
+			flag = true;
+			break;
+		}
+		else if (sharks_size == 1) break;
+
+		/*
+		print_smell(time_limit);
+		printf("\n[time = %d]\n", time_limit);
+		printf("이동 가능한 상어 : %d\n", sharks_size);
+		*/
+
+		// 1. 매 초마다 확인
+		// 2. 상어의 이동
+		while (sharks_size--) {
+			// 2-1. 상어의 정보
+			SHARK s = sharks.front();		sharks.pop();
+			sy = s.node.y;		sx = s.node.x;
+			sd = s.dir;
+			isSmelled = true;
+			// 2-2. 상어 사방 체크
+			for (int d = 1; d <= 4; d++) {	// 2-2-1. 냄새X 경우 탐색
+				nd = priority_dir[s.num][sd][d];
+				/*
+					s.num번 상어는 sd 방향을 가지고 있는데
+					이 방향을 가지고 있을 때, s.num상어의 우선순위 방향 순서대로
+				*/
+				ny = sy + dy[nd];
+				nx = sx + dx[nd];
+				if (sea[ny][nx].first != 0) continue;	// 테두리 or 냄새O
+
+				// 냄새가 없어서 갈 수 있는 상황
+				isSmelled = false;
+				if (chk[ny][nx] == INF) {
+					chk[ny][nx] = s.num;
+					clean.push_back({ {{ny, nx}, nd }, true });	// 후에 chk배열 초기화해주기 위함
+				}
+				else {
+					chk[ny][nx] = min(chk[ny][nx], s.num);	// 더 작은 숫자의 상어 기록(여기에서 갱신되어 없어지는 번호는 쫓겨나게 되는 상어임!)
+				}
+				break;
+			}
+			if (isSmelled) {
+				for (int d = 1; d <= 4; d++) {	// 2-2-2. 냄새O라면 자기 냄새 쪽으로
+					nd = priority_dir[s.num][sd][d];
+					ny = sy + dy[nd];
+					nx = sx + dx[nd];
+					if (sea[ny][nx].second == s.num) {
+						chk[ny][nx] = s.num;
+						clean.push_back({ {{ny, nx}, nd }, false });
+						break;
+					}
+				}
+			}
+		}
+
+		//printf("(clean_size) 이동 성공한 상어 개수 : %d\n", clean.size());
+		
+		// 3. 상어가 이동한 정보를 가지고 냄새 뿌리기 및 냄새 없애기
+		smell_size = smell.size();
+
+		//printf("(smell_size) 냄새 남아있는 구역 : %d\n", smell_size);
+		
+
+		while (smell_size--) {
+			NODE s = smell.front();		smell.pop();
+			//printf("%d %d\n", s.y, s.x);
+			sea[s.y][s.x].first = sea[s.y][s.x].first - 1;
+			if (sea[s.y][s.x].first == 0) sea[s.y][s.x].second = 0;
+			else smell.push(s);
+		}
+		for (pair<pair<NODE, int>, bool> n : clean) {
+			ny = n.first.first.y;		nx = n.first.first.x;
+			sharks.push({ chk[ny][nx], n.first.first, n.first.second });
+			sea[ny][nx] = { K, chk[ny][nx] };
+			chk[ny][nx] = INF;
+			if(n.second) smell.push({ ny, nx });
+		}
+		clean.clear();	// init
+
+		//printf("=====================\n");
+
+		time_limit++;
+	}
+}
+
+void output() { printf("%d", flag ? -1 : time_limit); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	input();
+	sharks_move();
+	output();
+	return 0;
+}
+#endif

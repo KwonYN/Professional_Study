@@ -1,0 +1,32 @@
+// (중) [교육A-0011] 동전 교환
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(15)
+#define WMAX	(64010)
+#define INF		(987654321)
+
+int T, N, W, unit[NMAX], dp[WMAX];
+
+int main() {
+	scanf("%d", &T);
+	dp[0] = 0;
+	for(int tc = 1; tc <= T; tc++) {
+		scanf("%d", &N);
+		for(int i = 1; i <= N; i++) { scanf("%d", &unit[i]); }
+		scanf("%d", &W);
+		for(int i = 1; i <= W; i++) { dp[i] = INF; }
+		
+		for(int i = 1; i <= W; i++) {
+			for(int j = 1; j <= N; j++) {
+				if(i-unit[j] < 0) continue; // break;	: unit이 오름차순으로 주어진다면 break도 가능!! 그런데 그런 말은 딱히 없었음!
+				dp[i] = min(dp[i], dp[i-unit[j]] + 1);
+			}
+		}
+		printf("#%d %d\n", tc, dp[W]);
+	}
+	return 0;
+}
+#endif

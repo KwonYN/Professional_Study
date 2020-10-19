@@ -597,13 +597,13 @@ bool find_circulation(int start_node, int cir_node) {
 void output(int tc) {
 	bool end_flag = true;
 	printf("#%d ", tc);
-	if (two_parent_node) {
+	if (two_parent_node) {	// 1) 부모가 둘 이나 있을 때
 		for (int i = result_idx[two_parent_node].size() - 1; i >= 0; i--) { // 최대 2번 돔
 			if (find_circulation(result_idx[two_parent_node][i], two_parent_node)) {
 				end_flag = false;
 				printf("%d %d\n", result_idx[two_parent_node][i], two_parent_node);
 				break;
-			}
+			}	// 1-1) 순환이 있을 때 && 입력받은 정보들 중 가장 마지막 간선을 출력해야 하기 때문에 뒤부터 돈 것임
 		}
 		if (end_flag) {
 			for (int i = result_idx[two_parent_node].size() - 1; i >= 0; i--) {	// 최대 2번
@@ -613,10 +613,10 @@ void output(int tc) {
 				}
 				printf("%d %d\n", result_idx[two_parent_node][i], two_parent_node);
 				break;
-			}
+			}	// 1-2) 순환이 이루어지지 않는다면, 루트 노드가 아니면서 나가는 간선이 하나 밖에 없는 애들 아닌 애 아무나 지워
 		}
 	}
-	else {
+	else {	// 부모 노드가 두 개인 노드가 없다면? 전체 순환!! 나가는 간선이 하나밖에 없어서 그 선 지워지면 안되는 간선 빼고 지우자!!
 		for (int i = N - 1; i >= 0; i--) { // 최대 N번
 			if (outdegree[edges[i].first] >= 1) {
 				printf("%d %d\n", edges[i].first, edges[i].second);

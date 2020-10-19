@@ -1,0 +1,82 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <queue>
+using namespace std;
+typedef long long ll;
+
+int T, n, m, p;
+vector <pair<pair<int, int>, int>> vc[10001];
+ll dist[10001];
+
+void dijkstra(int start) {
+    priority_queue <pair<pair<ll, int>, int>> pq;
+    dist[start] = 0;
+    pq.push({ {0,start},1 });
+    bool isWeatherClear;
+    while (!pq.empty()) {
+        auto x = pq.top(); pq.pop();
+        int here = x.first.second;
+        ll hereCost = -x.first.first;
+        int isHereTunnel = x.second;
+        if (dist[here] < hereCost)
+            continue;
+        // 날씨 iteration을 구하기 위한 flag
+        int weatherFlag = dist[here] / p;
+        // 이전 단계에서 차를 운전하고 남은 step (날씨가 맑을때는 이 residualStep만큼 no extra cost로 더 이동할 수 있다)
+        int residualStep = p - (dist[here] % p);
+        // 0번째나 짝수번째 날씨 iteration이라면 날씨가 맑은 상태임 <-> 홀수번째면 흐린 날씨
+        if (!(weatherFlag & 1))
+            isWeatherClear = true;
+        else
+            isWeatherClear = false;
+
+        for (auto y : vc[here]) {
+            int next = y.first.first;
+            ll nextCost = (ll)y.first.second;
+            int isNextTunnel = y.second;
+            ll waitTime = 0, stopTime = 0;
+            if (!isNextTunnel) {
+                if (isWeatherClear) {
+                    // 현재 날씨가 맑고, residualStep보다 다음 도로 길이가 더 길면, 기본 residualStep만큼 가야하니까 waitTime에 p를 더해주고,
+
+                    // (다음 도로 길이에서 residualStep 길이를 빼준 거리) 기준으로 쉬는 시간 연산
+                    if (nextCost > residualStep) {
+                        stopTime += ((nextCost - residualStep - 1) / p) * p;
+                        if (residualStep)
+                            waitTime += p;
+                    }
+                }
+                else {
+                    // 현재 날씨가 흐리면 residualStep만큼 기다렸다가 출발해야 함
+                    waitTime += residualStep;
+                    stopTime += ((nextCost - 1) / p) * p;
+                }
+            }
+            if (dist[next] > dist[here] + waitTime + stopTime + nextCost) {
+                dist[next] = dist[here] + waitTime + stopTime + nextCost;
+                pq.push({ {-dist[next], next}, isNextTunnel });
+            }
+        }
+    }
+}
+
+int main() {
+    scanf("%d", &T);
+    for (int t = 1; t <= T; t++) {
+        scanf("%d%d%d", &n, &m, &p);
+        for (int i = 1; i <= n; i++) {
+            vc[i].clear();
+            dist[i] = 1e18;
+        }
+        while (m--) {
+            int a, b, c, d;
+            scanf("%d%d%d%d", &a, &b, &c, &d);
+            vc[a].push_back({ {b, c}, d });
+            vc[b].push_back({ {a, c}, d });
+        }
+        dijkstra(1);
+        printf("#%d %lld\n", t, dist[n]);
+    }
+    return 0;
+}

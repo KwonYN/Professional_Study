@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="헤더 파일">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
@@ -13,51 +9,184 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="리소스 파일\소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleApplication1.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중상) [연습P-0022] LIS 2.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="[기출P-0007] 팀 구성.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="(중상) [기출P-0046] 직사각형 체인.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="(중) [사전A-0033] [2019년 12월 PRO 검정 사전 테스트] 스마트 팩토리.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="(중) [사전A-0031] [2019년 10~11월 PRO 검정 사전 테스트] 자율주행 테스트.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중) [기출A-0028] 제품의 일련번호 2.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중상) [모의P-0001] 잠자는 사이에.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중상) [교육P-0033] 제품의 일련번호 3.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중) [기출A-0040] 석탑.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중상) [기출P-0067] 가장 큰 최단 경로.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="[기출A-0040] 석탑.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="(중상) [기출P-0019] 일방통행.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [모의P-0002] 답글의 수.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_12865_평범한 배낭.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중) [교육A-0012] 보석 털이.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="5653. [모의 SW 역량테스트] 줄기세포배양.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="5656. [모의 SW 역량테스트] 벽돌 깨기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="5648. [모의 SW 역량테스트] 원자 소멸 시뮬레이션.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="1953. [모의 SW 역량테스트] 탈주범 검거.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_19237_어른 상어.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_8217_유성.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_10999_구간합구하기2.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[기출P-0038] 키컸으면.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="★%28중%29 [사전A-0029] [2019년 8_9월 PRO 검정 사전 테스트] 여름 신상품.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="★%28중%29 [사전A-0031] [2019년 10~11월 PRO 검정 사전 테스트] 자율주행 테스트.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="★%28중%29 [사전A-0033] [2019년 12월 PRO 검정 사전 테스트] 스마트 팩토리.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="★%28중%29 [연습A-0016] 보석 도둑.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="★%28중상%29 [기출P-0046] 직사각형 체인.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0018] 종이컵 전화기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="오락실.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0035] 주차 타워.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[기출P-0058] 탱크.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_2150_SCC.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[교육P-0020] 달리기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="섬나라.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[기출P-0039] 개미 굴 파기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출A-0014] 타잔과 치타.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="바둑돌.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0070] 조약돌 게임.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [기출P-0055] 고양이.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="(중상) [모의P-0002] 답글의 수_ver.2.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_11658_타임머신.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="[기출P-0070] 조약돌.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_1854_K번째 최단경로 찾기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_6416_트리인가.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="드라이빙.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_2014_소수의 곱.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="상자옮기기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="감독.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_1238_파티.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_1904_01타일.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_17404_RGB거리2.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_1010_다리 놓기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_3860_할루윈 묘지.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BOJ_2517_달리기.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="긴급 이송.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Pac Man.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="오락실2.cpp">
+      <Filter>리소스 파일\소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt">
-      <Filter>소스 파일</Filter>
+      <Filter>리소스 파일\소스 파일</Filter>
     </Text>
   </ItemGroup>
 </Project>

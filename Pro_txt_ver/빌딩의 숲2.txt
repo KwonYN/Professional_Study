@@ -1,0 +1,60 @@
+ // (중상) [연습P-0031] 빌딩의 숲2 
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(2010)
+#define MOD		(1000000007)
+
+typedef long long ll;
+int T, N, cnt;
+int can_see[NMAX];
+bool building[NMAX];
+int building_arr[NMAX];
+ll result;
+
+void init() {
+	for(int i = 1; i <= N; i++) {
+		building[i] = false;
+		building_arr[i] = 0;
+	}
+	cnt = 0;
+	result = 1LL;
+}
+
+void input() {
+	int tmp;
+	scanf("%d", &N);
+	init();
+	for(int i = 1; i <= N; i++) {
+		scanf("%d", &tmp);
+		can_see[i] = tmp;
+		if(building[tmp]) continue;
+		building[tmp] = true;
+		building_arr[++cnt] = tmp;
+	}
+}
+
+void operation() {
+	int back_cnt = 0, n = cnt;
+	for(int i = N; i >= 1; i--) {
+		if(building[i]) continue;
+		while(building_arr[cnt-1] >= i) cnt--;
+		result = result%(1LL*MOD) * (1LL*n-cnt+back_cnt+1)%(1LL*MOD);
+		back_cnt++;
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, result); }
+
+int main() {
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		input();
+		operation();
+		output(tc);
+	}
+	return 0;
+}
+#endif

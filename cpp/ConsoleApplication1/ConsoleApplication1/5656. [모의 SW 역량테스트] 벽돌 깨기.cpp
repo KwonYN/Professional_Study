@@ -1,0 +1,124 @@
+// 5656. [모의 SW 역량테스트] 벽돌 깨기
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <queue>
+#include <algorithm>
+using namespace std;
+#define NMAX	(4)
+#define WMAX	(12)
+#define HMAX	(15)
+
+struct NODE { int y, x; };
+int T, N, W, H;
+int HW[HMAX+5][WMAX+5], HW_tmp[NMAX+5][HMAX+5][WMAX+5];
+int dy[4] = { -1, 1, 0, 0 }, dx[4] = { 0, 0, -1, 1 };
+int min_cnt;
+
+void input() {
+	min_cnt = 0x7fffffff;
+	scanf("%d %d %d", &N, &W, &H);
+	for (int i = 1; i <= H; i++) {
+		for (int j = 1; j <= W; j++) {
+			scanf("%d", &HW[i][j]);
+		}
+	}
+}
+
+void copy_arr(int d) {
+	for (int i = 1; i <= H; i++) {
+		for (int j = 1; j <= W; j++) {
+			HW_tmp[d][i][j] = HW[i][j];
+		}
+	}
+}
+
+void reverse_copy_arr(int d) {
+	for (int i = 1; i <= H; i++) {
+		for (int j = 1; j <= W; j++) {
+			HW[i][j] = HW_tmp[d][i][j];
+			HW_tmp[d][i][j] = 0;	// 안전 초기화
+		}
+	}
+}
+
+void delete_bricks(int w) {
+	queue<pair<NODE, int>> que;
+	bool visited[HMAX+5][WMAX+5] = { false };
+	int ny, nx;
+	for (int i = 1; i <= H; i++) {
+		if (HW[i][w]) {
+			que.push({ {i, w}, HW[i][w] - 1 });
+			HW[i][w] = 0;
+			visited[i][w] = true;
+			break;
+		}
+	}
+	while (!que.empty()) {
+		pair<NODE, int> node = que.front();		que.pop();
+		for (int d = 0; d < 4; d++) {
+			for (int r = 1; r <= node.second; r++) {
+				ny = node.first.y + dy[d]*r;
+				nx = node.first.x + dx[d]*r;
+				if (ny < 1 || ny > H || nx < 1 || nx > W || visited[ny][nx]) continue;
+				visited[ny][nx] = true;
+				if (HW[ny][nx]) {
+					que.push({ {ny, nx}, HW[ny][nx] - 1 });
+					HW[ny][nx] = 0;
+				}
+			}
+		}
+	}
+}
+
+void gravity_action() {
+	int lv;
+	for (int i = 1; i <= W; i++) {
+		lv = H;
+		for (int j = H; j >= 1; j--) {
+			if (HW[j][i]) HW[lv--][i] = HW[j][i];
+		}
+		for (int j = lv; j >= 1; j--) HW[j][i] = 0;
+	}
+}
+
+int count() {
+	int cnt = 0;
+	for (int i = 1; i <= W; i++) {
+		for (int j = H; j >= 1; j--) {
+			if (HW[j][i]) cnt++;
+			else break;
+		}
+	}
+	return cnt;
+}
+
+void dfs(int d) {
+	int rest;
+	if (d >= N) {
+		rest = count();
+		if (min_cnt > rest) min_cnt = rest;
+		return;
+	}
+	for (int i = 1; i <= W; i++) {
+		copy_arr(d);
+		delete_bricks(i);
+		gravity_action();
+		dfs(d + 1);
+		reverse_copy_arr(d);
+	}
+}
+
+void output(int tc) { printf("#%d %d\n", tc, min_cnt); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		dfs(0);
+		output(tc);
+	}
+	return 0;
+}
+#endif

@@ -71,7 +71,7 @@ int main() {
 }
 #endif
 
-// 이전 코드
+.// 이전 코드
 #if 0
 #include <iostream>
 #include <algorithm>

@@ -1,0 +1,170 @@
+// 1
+import java.util.*;
+import java.io.*;
+// 등산로 조성
+public class Solution {
+    static int n, k, a[][], ans;
+    static boolean chk[][];
+    static int dx[] = {0,0,-1,1};
+    static int dy[] = {1,-1,0,0};
+     
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int T = Integer.parseInt(br.readLine());
+        for(int t=1; t<=T; t++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            n = Integer.parseInt(st.nextToken());
+            k = Integer.parseInt(st.nextToken());
+            a = new int[n][n];
+            for(int i=0; i<n; i++) {
+                st = new StringTokenizer(br.readLine());
+                for(int j=0; j<n; j++) {
+                    a[i][j] = Integer.parseInt(st.nextToken());
+                }
+            }
+             
+            //Highest point
+            int highest_p = 0;
+            for(int i=0; i<n; i++) {
+                for(int j=0; j<n; j++)
+                    if(highest_p < a[i][j]) highest_p = a[i][j];
+            }
+            Queue<XY> q = new LinkedList<>();
+            for(int i=0; i<n; i++) {
+                for(int j=0; j<n; j++)
+                    if(highest_p == a[i][j]) q.add(new XY(i,j));
+            }
+            ans = 0;
+            chk = new boolean[n][n];
+            while(!q.isEmpty()) {
+                XY top = q.poll();
+                chk[top.x][top.y] = true;
+                go(top, false, 0);
+                chk[top.x][top.y] = false;
+            }
+             
+            System.out.println("#"+t+" "+ans);
+        }       
+    }
+    static void go(XY p, boolean dig, int cnt) {
+        cnt++;
+        if(ans<cnt) ans = cnt;
+         
+        for(int i=0; i<4; i++) {
+            int x = p.x + dx[i];
+            int y = p.y + dy[i];
+            if(x>=0 && x<n && y>=0 && y<n) {
+                if(a[x][y] < a[p.x][p.y] && !chk[x][y]) {
+                    chk[x][y] = true;
+                    go(new XY(x,y),dig,cnt);
+                    chk[x][y] = false;
+                }
+                if(!dig && !chk[x][y] && a[x][y]>=a[p.x][p.y] && a[x][y]-k < a[p.x][p.y]) {
+                    chk[x][y] = true;
+                    int tmp = a[x][y];
+                    a[x][y] = a[p.x][p.y] - 1;
+                    go(new XY(x,y),true,cnt);
+                    a[x][y] = tmp;
+                    chk[x][y] = false;
+                }
+            }
+             
+             
+        }
+    }
+}
+class XY{
+    int x, y;
+    XY(int x, int y){
+        this.x = x; this.y = y;
+    }
+}
+
+
+
+// 2
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+ 
+public class Solution {
+ 
+    static int T;
+    static int N;
+    static int K;
+    static int[][] map;
+    static int[][] direction= {
+            {-1,0},
+            {0,1},
+            {1,0},
+            {0,-1}
+    };
+    static int max;
+    static int maxHeight;
+    static boolean[][] visited;
+    public static void main(String[] args) throws NumberFormatException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer stzr;
+        T = Integer.parseInt(br.readLine().trim());
+        for(int tc=0;tc<T;tc++) {
+            stzr = new StringTokenizer(br.readLine().trim());
+            N = Integer.parseInt(stzr.nextToken());
+            K = Integer.parseInt(stzr.nextToken());
+            map = new int[N][N];
+            visited = new boolean[N][N];
+            for(int i=0;i<N;i++) {
+                stzr = new StringTokenizer(br.readLine().trim());
+                for(int j=0;j<N;j++) {
+                    map[i][j] = Integer.parseInt(stzr.nextToken());
+                    maxHeight = Math.max(map[i][j], maxHeight);
+                }
+            }
+            for(int i=0;i<N;i++) {
+                for(int j=0;j<N;j++) {
+                    if(map[i][j]==maxHeight) {
+                        visited[i][j] = true;
+                        go(i,j,0,K);
+                        visited[i][j] = false;
+                    }
+                }
+            }
+            System.out.println("#"+(tc+1)+" "+(max+1));
+            max = 0;
+            maxHeight = 0;
+        }
+    }
+    private static void go(int i, int j, int cnt, int k) {
+        int newI, newJ;
+        boolean flag = false;
+        for(int d=0;d<direction.length;d++) {
+            newI = i+direction[d][0];
+            newJ = j+direction[d][1];
+            if(check(newI,newJ)&&!visited[newI][newJ]&&map[i][j]>map[newI][newJ]) {
+                visited[newI][newJ] = true;
+                go(newI,newJ,cnt+1,k);
+                flag = true;
+                visited[newI][newJ] = false;
+            }
+            if(k!=0&&check(newI,newJ)&&!visited[newI][newJ]&&map[i][j]<=map[newI][newJ]&&map[newI][newJ]-map[i][j]<K) {
+                int temp = map[newI][newJ];
+                visited[newI][newJ] = true;
+                map[newI][newJ] = map[i][j]-1;
+                go(newI, newJ, cnt+1,0);
+                flag = true;
+                visited[newI][newJ] = false;
+                map[newI][newJ] = temp;
+            }
+        }
+        if(!flag) {
+            max = Math.max(max, cnt);
+        }
+    }
+    private static boolean check(int newI, int newJ) {
+        if(newI>=0&&newI<N&&newJ>=0&&newJ<N) {
+            return true;
+        }
+        return false;
+    }
+ 
+}

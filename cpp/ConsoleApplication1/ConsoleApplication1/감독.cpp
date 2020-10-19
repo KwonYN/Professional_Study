@@ -1,0 +1,182 @@
+// 감독
+#if 0
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(300010)
+#define INF		(987654321)
+
+typedef pair<int, int> pii;
+int T, N, K;
+pii player[NMAX];
+pii max_tree[NMAX*3], min_tree[NMAX*3];
+int leaf_node[NMAX];
+pii result[NMAX];
+int max_cut_idx, min_cut_idx;
+
+void input() {
+	int l, h;
+	scanf("%d %d", &N, &K);
+	for (int i = 1; i <= N; i++) {
+		scanf("%d %d", &l, &h);
+		player[i] = { l, h };
+	}
+}
+
+void init_tree(int s, int e, int idx) {
+	if (s == e) {
+		leaf_node[s] = idx;
+		max_tree[idx] = { player[s].second, s };
+		min_tree[idx] = { player[s].first, s };
+		return;
+	}
+	int m = (s + e) / 2;
+	init_tree(s, m, idx<<1);
+	init_tree(m+1, e, (idx<<1)|1);
+	if (max_tree[idx<<1].first >= max_tree[(idx<<1)|1].first)
+		max_tree[idx] = max_tree[idx<<1];
+	else max_tree[idx] = max_tree[(idx<<1)|1];
+	if (min_tree[idx<<1].first <= min_tree[(idx<<1)|1].first)
+		min_tree[idx] = min_tree[idx<<1];
+	else min_tree[idx] = min_tree[(idx<<1)|1];
+}
+
+pii get_max(int s, int e, int l, int r, int idx) {
+	if (e < l || r < s) return { -1, INF };
+	if (l <= s && e <= r) return max_tree[idx];
+	int m = (s + e) / 2;
+	pii left = get_max(s, m, l, r, idx<<1);
+	pii right = get_max(m+1, e, l, r, (idx<<1)|1);
+	if (left.first >= right.first) return left;
+	return right;
+}
+
+pii get_min(int s, int e, int l, int r, int idx) {
+	if (e < l || r < s) return { INF, INF };
+	if (l <= s && e <= r) return min_tree[idx];
+	int m = (s + e) / 2;
+	pii left = get_min(s, m, l, r, idx<<1);
+	pii right = get_min(m + 1, e, l, r, (idx<<1)|1);
+	if (left.first <= right.first) return left;
+	return right;
+}
+
+void delete_max(int idx) {
+	idx = leaf_node[idx];
+	max_cut_idx = 0;
+	pii origin = max_tree[idx];
+	max_tree[idx].first = -1;
+	while (idx) {
+		idx >>= 1;
+		if (max_tree[idx].first > origin.first
+			|| ((max_tree[idx].first == origin.first) && (max_tree[idx].second < origin.second))) {
+			if (max_tree[idx << 1].first >= max_tree[(idx << 1) | 1].first)
+				max_tree[idx] = max_tree[idx << 1];
+			else max_tree[idx] = max_tree[(idx << 1) | 1];
+		}
+		else {
+			max_cut_idx = idx;
+			break;
+		}
+	}
+}
+
+void delete_min(int idx) {
+	idx = leaf_node[idx];
+	min_cut_idx = 0;
+	pii origin = min_tree[idx];
+	min_tree[idx].first = INF;
+	while (idx) {
+		idx >>= 1;
+		if (min_tree[idx].first < origin.first
+			|| ((min_tree[idx].first == origin.first) && (min_tree[idx].second < origin.second))) {
+			if (min_tree[idx<<1].first >= min_tree[(idx<<1)|1].first)
+				min_tree[idx] = min_tree[idx<<1];
+			else min_tree[idx] = max_tree[(idx<<1)|1];
+		}
+		else {
+			min_cut_idx = idx;
+			break;
+		}
+	}
+}
+
+void recovery_max(int idx, int val) {
+	int index = idx;
+	idx = leaf_node[idx];
+	while (idx > max_cut_idx) {
+		max_tree[idx] = { val, index };
+		idx >>= 1;
+	}
+}
+
+void recovery_min(int idx, int val) {
+	int index = idx;
+	idx = leaf_node[idx];
+	while (idx > min_cut_idx) {
+		min_tree[idx] = { val, index };
+		idx >>= 1;
+	}
+}
+
+void oepration() {
+	int l, r;
+	pii max_H, min_L, after_max_H, after_min_L;
+	init_tree(1, N, 1);
+	for (int i = 1; i <= N - K + 1; i++) {
+		l = i;		r = i + K - 1;
+		max_H = get_max(1, N, l, r, 1);
+		min_L = get_min(1, N, l, r, 1);
+
+		delete_max(max_H.second);
+		delete_min(min_L.second);
+
+		after_max_H = get_max(1, N, l, r, 1);
+		after_min_L = get_min(1, N, l, r, 1);
+
+		recovery_max(max_H.second, max_H.first);
+		recovery_min(min_L.second, min_L.first);
+
+		if (max_H.second != min_L.second) {
+			int chk1 = max_H.first - after_min_L.first;
+			int chk2 = after_max_H.first - min_L.first;
+			if (chk1 < chk2) result[i] = { chk1, min_L.second };
+			else if (chk2 < chk1) result[i] = { chk2, max_H.second };
+			else result[i] = { chk1, min(min_L.second, max_H.second) };
+		}
+		else {
+			int chk = after_max_H.first - after_min_L.first;
+			result[i] = { chk, max_H.second };
+		}
+	}
+}
+
+void output(int tc) {
+	int min_hazard = INF, min_idx = INF;
+	for (int i = 1; i <= N - K + 1; i++) {
+		if (min_hazard > result[i].first) {
+			min_hazard = result[i].first;
+			min_idx = result[i].second;
+		}
+		else if (min_hazard == result[i].first) {
+			min_idx = min(min_idx, result[i].second);
+		}
+	}
+	printf("#%d %d %d\n", tc, min_hazard, min_idx);
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input();
+		oepration();
+		output(tc);
+	}
+	return 0;
+}
+#endif
+
+
+// 감독 (시작 ~ 인덱스-1, 인덱스+1 ~ 끝 두 번 조회)

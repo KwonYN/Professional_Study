@@ -35,6 +35,7 @@ using namespace std;
 #define NMAX	(300000)
 #define MINUS_INF	(0x80000000)
 
+
 int T, N, arr[NMAX+5];
 int max_lis, arr_len;
 

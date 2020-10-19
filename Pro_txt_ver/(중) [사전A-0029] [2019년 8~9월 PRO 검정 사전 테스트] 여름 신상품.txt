@@ -1,0 +1,75 @@
+// (중) [사전A-0029] [2019년 8~9월 PRO 검정 사전 테스트] 여름 신상품
+/*
+	모자 / 상의 / 하의 각 1개씩으로 이루어진 세트 상품
+		-> 세트로만 판매됨!
+		-> 상품코드는 모자(1), 상의(2), 하의(3)
+	N개의 판매점 (1 ~ N까지 판매점 번호)
+
+	1 x y k c
+	[납품] : x~y 판매점에 k 코드 상품을 c개씩 더해줌
+	1) x ~ y(x<=y) 사이에 포함되는 "모든 판매점"에
+	   상품코드가 k인 상품을 c개씩 납품
+	2) 1 <= c <= 100
+
+	2 x c
+	[판매] : x번 판매점에 c개 or (미만 case)가능한 세트 빼줌
+	1) x번 판매점으로 c개 세트(1+2+3) 판매 요청 처리
+	2) x번 판매점에서 c개 세트 상품을 판매할 수 있다면 c개 판매
+	   c개 세트 만들 수 없다면 모든 세트만 판매(c개 미만)
+	3) 1<= c <= 1천만
+
+	3 x y
+	[판매수량 조사] : 판매가 완료된 세트 수 sum
+	1) x ~ y(x<=y) 판매점 누적 판매된 세트 수 조사
+*/
+#if 01
+#pragma warning(diable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100000)	// 판매점 수
+#define QMAX	(100000)	// 명령의 수
+
+typedef long long ll;
+struct COMMODITY { int hat, top, bottom; };
+int T, N, Q;
+COMMODITY tree[NMAX+5];		// 펜윅트리
+ll acc_sales;
+
+void init() {
+	acc_sales = 0LL;
+	for (int i = 1; i <= N; i++) {
+		tree[i] = { 0, 0, 0 };
+	}
+}
+
+void input_() {
+	int cmd, shop1, shop2, commodity, cnt;
+	scanf("%d %d", &N, &Q);
+	init();
+	for (int i = 1; i <= Q; i++) {
+		scanf("%d", &cmd);
+		if (cmd == 1) {	// 납품
+			scanf("%d %d %d %d", &shop1, &shop2, &commodity, &cnt);
+		}
+		else if (cmd == 2) { // 판매
+			scanf("%d %d", &shop1, &cnt);
+		}
+		else { // 판매수량 조사
+			scanf("%d %d", &shop1, &shop2);
+		}
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, acc_sales); }
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	scanf("%d", &T);
+	for (int tc = 1; tc <= T; tc++) {
+		input_();
+		output(tc);
+	}
+	return 0;
+}
+#endif

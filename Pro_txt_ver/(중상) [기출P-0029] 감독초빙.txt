@@ -1,0 +1,89 @@
+// (중상) [기출P-0029] 감독초빙
+/*
+	그림(좌표평면)을 그려보았음에도 불구하고 감독으로 가능한 케이스의 조건을 완전히 파악해주지는 못했다...
+	
+	[원래 내 생각]
+	1. shoot(x축)과 dribble(y축)을
+	   x 기준으로 오름차순, x가 같다면 y 기준으로 오름차순 정렬해줌
+	   (x가 같은 것이 있을 때는 y가 가장 작은 애를 기준으로만 생각해줘도 무방하기 때문!)
+	2. 가장 처음과 끝에 10억의 좌표 애들을 추가해줌!
+	   (★(3,2)가 입력 중 가장 처음이라고 한다면, (1, 10억), (2, 10억)의 감독이 와도 가능하기 때문!!!!!!)
+	3. i-1번째 shoot과 i번째 shoot 차이(x축 거리)와
+       i번째까지의 min_diribble을 곱해주고
+	   (i, min_dribble) 이거 하나만 빼주면 된다고 생각했음....
+	
+	[진짜 조건]
+	1. shoot(x축)과 dribble(y축)을
+	   x 기준으로 오름차순, x가 같다면 y 기준으로 오름차순 정렬해줌
+	   (x가 같은 것이 있을 때는 y가 가장 작은 애를 기준으로만 생각해줘도 무방하기 때문!)
+	2. 가장 처음과 끝에 10억의 좌표 애들을 추가해줌!
+	   (★(3,2)가 입력 중 가장 처음이라고 한다면, (1, 10억), (2, 10억)의 감독이 와도 가능하기 때문!!!!!!)
+	   
+	------------------------------------여기까지는 같음------------------------------------
+	
+	3. i-1번째 shoot과 i번째 shoot 차이(x축 거리)와
+	   i-1번째까지의 min_dribble에서 한 칸 낮춰준 값을 곱해야 했음!!!!
+	   (★(3,9)와 다음에 (7,6)이 있다고 한다면, (4,8), (5,8), (6,8)까지도 감독이 될 수 있음!!)
+*/
+#if 01
+#pragma warning(disable: 4996)
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+#define NMAX	(100010)
+#define MAX_CAPA	(1000000001)
+
+typedef long long ll;
+typedef pair<int, int> pii;
+int T, N;
+pii player[NMAX];
+ll result_cnt;
+
+bool cmp(pii p1, pii p2) {
+	if(p1.first < p2.first) return true;
+	if(p1.first == p2.first) {
+		if(p1.second < p2.second) return true;
+	}
+	return false;
+}
+
+void input() {
+	int shoot, dribble;
+	scanf("%d", &N);
+	for(int i = 1; i <= N; i++) {
+		scanf("%d %d", &shoot, &dribble);
+		player[i] = {shoot, dribble};
+	}
+	player[0] = {1, MAX_CAPA};
+	player[N+1] = {MAX_CAPA, MAX_CAPA};
+	sort(player+1, player+N+1, cmp);
+	/*for(int i = 0; i <= N+1; i++) {
+		printf("%d %d\n", player[i].first, player[i].second);
+	}*/
+}
+
+void get_result_cnt() {
+	int prev_shoot = 1;
+	int min_dribble = player[0].second;
+	result_cnt = 0LL;
+	for(int i = 1; i <= N+1; i++) {
+		int shoot = player[i].first;
+		int dribble = player[i].second;
+		result_cnt += 1LL*(shoot-prev_shoot)*(min_dribble-1);
+		prev_shoot = shoot;
+		min_dribble = min(min_dribble, dribble);
+	}
+}
+
+void output(int tc) { printf("#%d %lld\n", tc, result_cnt); }
+
+int main() {
+	scanf("%d", &T);
+	for(int tc = 1; tc <= T; tc++) {
+		input();
+		get_result_cnt();
+		output(tc);
+	}
+	return 0;
+}
+#endif
